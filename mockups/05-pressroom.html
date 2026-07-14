@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 · Pressroom — jackherizsmith.com concept</title>
+<style>
+  :root{
+    --chrome:#c9cacd; --chrome-hi:#f2f2f3; --chrome-lo:#7e8085; --paste:#8f9196;
+    --ink:#1d1d1f; --cyan:#00a0cf; --magenta:#e64ba0; --ui:Geneva,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:var(--ui);font-size:11px;color:var(--ink);overflow:hidden;
+    display:grid;grid-template-rows:24px 32px 1fr 24px;background:var(--chrome);
+  }
+  .bevel{background:var(--chrome);border:1px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi)}
+
+  /* ── Menus & control strip ───────────── */
+  .menubar{display:flex;align-items:center;background:var(--chrome);border-bottom:1px solid var(--chrome-lo);padding:0 10px;gap:2px}
+  .menubar span{padding:3px 10px;cursor:default}
+  .menubar span:hover{background:#2a4a80;color:#fff}
+  .menubar .grow{flex:1}
+  .menubar .app{font-weight:700;letter-spacing:.02em}
+
+  .controls{display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--chrome-lo)}
+  .controls .group{display:flex;align-items:center;gap:4px;padding:2px 6px}
+  .controls .lbl{color:#4c4d51}
+  .controls .well{
+    background:#fff;border:1px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);
+    padding:2px 8px;min-width:56px;font-variant-numeric:tabular-nums;
+  }
+  .controls .grow{flex:1}
+  .btn{
+    font-family:var(--ui);font-size:11px;padding:3px 14px;cursor:pointer;
+    background:var(--chrome);border:1px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);
+  }
+  .btn:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+  .btn.primary{font-weight:700}
+
+  /* ── Workspace with rulers ───────────── */
+  .workspace{display:grid;grid-template-columns:22px 1fr;grid-template-rows:22px 1fr;min-height:0;position:relative}
+  .corner{background:var(--chrome);border-right:1px solid var(--chrome-lo);border-bottom:1px solid var(--chrome-lo)}
+  .ruler{position:relative;background:#e9e9ea;overflow:hidden}
+  .ruler.h{
+    border-bottom:1px solid var(--chrome-lo);
+    background-image:
+      repeating-linear-gradient(90deg,transparent 0 11px,#9b9ca0 11px 12px),
+      repeating-linear-gradient(90deg,transparent 0 59px,#4c4d51 59px 60px);
+    background-position:0 12px,0 6px;background-repeat:repeat-x;
+    background-size:12px 10px,60px 16px;
+  }
+  .ruler.v{
+    border-right:1px solid var(--chrome-lo);
+    background-image:
+      repeating-linear-gradient(0deg,transparent 0 11px,#9b9ca0 11px 12px),
+      repeating-linear-gradient(0deg,transparent 0 59px,#4c4d51 59px 60px);
+    background-position:12px 0,6px 0;background-repeat:repeat-y;
+    background-size:10px 12px,16px 60px;
+  }
+
+  .pasteboard{
+    position:relative;overflow:auto;background:var(--paste);
+    background-image:linear-gradient(180deg,rgba(0,0,0,.08),transparent 40px);
+  }
+  .paste-inner{position:relative;width:1150px;padding:64px 0 90px 70px}
+
+  /* print furniture */
+  .colourbar{display:flex;margin:0 0 14px 2px;width:max-content;border:1px solid rgba(0,0,0,.35)}
+  .colourbar i{width:26px;height:12px;display:block}
+  .reg{position:absolute;top:56px;left:520px;width:22px;height:22px;opacity:.75}
+
+  /* ── The spread ──────────────────────── */
+  .spread{position:relative;display:flex;width:max-content;box-shadow:0 14px 44px rgba(10,14,20,.42)}
+  .page{position:relative;width:400px;height:560px;background:#fff}
+  .page + .page{border-left:1px solid #d9d9dc}
+  .margins{position:absolute;inset:32px;border:1px solid var(--magenta);opacity:.55;pointer-events:none}
+  .cols{position:absolute;top:32px;bottom:32px;left:50%;width:18px;transform:translateX(-50%);
+        border-left:1px solid var(--cyan);border-right:1px solid var(--cyan);opacity:.5;pointer-events:none}
+
+  .crop{position:absolute;width:14px;height:14px;pointer-events:none}
+  .crop::before,.crop::after{content:"";position:absolute;background:#2c2d30}
+  .crop::before{width:14px;height:1px}
+  .crop::after{width:1px;height:14px}
+  .c-tl{top:-20px;left:-20px}.c-tl::before{bottom:0}.c-tl::after{right:0}
+  .c-tr{top:-20px;right:-20px}.c-tr::before{bottom:0}.c-tr::after{left:0}
+  .c-bl{bottom:-20px;left:-20px}.c-bl::before{top:0}.c-bl::after{right:0}
+  .c-br{bottom:-20px;right:-20px}.c-br::before{top:0}.c-br::after{left:0}
+
+  /* cover */
+  .cover{padding:46px 40px;display:flex;flex-direction:column;height:100%}
+  .cover .eyebrow{font-size:9px;letter-spacing:.34em;color:#8b8d92;margin-bottom:26px}
+  .cover h1{
+    font-family:Didot,"Bodoni 72",Georgia,serif;font-weight:400;
+    font-size:106px;line-height:.8;letter-spacing:-.01em;margin-left:-5px;
+  }
+  .cover .surname{
+    font-family:Didot,"Bodoni 72",Georgia,serif;font-size:19px;letter-spacing:.28em;
+    margin:16px 0 26px;border-bottom:1px solid var(--ink);padding-bottom:18px;white-space:nowrap;
+  }
+  .cover .standfirst{
+    font-family:Baskerville,"Baskerville Old Face",Georgia,serif;font-style:italic;
+    font-size:15px;line-height:1.55;color:#3c3d40;max-width:250px;
+  }
+  .cover .toc{margin-top:auto;font-size:10px;letter-spacing:.18em;color:#5c5e63;line-height:1.9}
+  .cover .toc b{color:var(--ink);font-weight:600}
+  .barcode{
+    position:absolute;bottom:40px;right:40px;width:84px;height:40px;
+    background:repeating-linear-gradient(90deg,#1d1d1f 0 2px,#fff 2px 4px,#1d1d1f 4px 5px,#fff 5px 9px);
+    border:4px solid #fff;outline:1px solid #d9d9dc;
+  }
+  .barcode::after{content:"free · forever";position:absolute;top:100%;right:0;font-size:8px;letter-spacing:.1em;margin-top:4px}
+
+  /* article page */
+  .article{padding:44px 38px;height:100%;display:flex;flex-direction:column}
+  .article h2{
+    font-family:Didot,"Bodoni 72",Georgia,serif;font-weight:400;font-size:30px;margin-bottom:6px;
+  }
+  .article .rubric{font-size:9px;letter-spacing:.3em;color:#8b8d92;margin-bottom:20px}
+  .colwrap{
+    columns:2;column-gap:20px;flex:1;
+    font-family:Baskerville,"Baskerville Old Face",Georgia,serif;font-size:12px;line-height:14px;
+    background:repeating-linear-gradient(180deg,transparent 0 13px,rgba(0,160,207,.12) 13px 14px);
+    color:#2c2d30;
+  }
+  .colwrap p{margin-bottom:14px;text-align:justify;hyphens:auto}
+  .colwrap .lead::first-letter{
+    font-family:Didot,"Bodoni 72",Georgia,serif;font-size:40px;float:left;
+    line-height:.8;padding:3px 6px 0 0;
+  }
+  .colwrap .entry b{font-family:var(--ui);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+  .folio{
+    display:flex;justify-content:space-between;font-size:9px;letter-spacing:.2em;
+    color:#8b8d92;padding-top:14px;
+  }
+
+  /* ── Palettes ────────────────────────── */
+  .palette{position:absolute;right:18px;width:200px;box-shadow:2px 3px 0 rgba(0,0,0,.25);z-index:40}
+  .palette .ptitle{
+    height:16px;display:flex;align-items:center;padding:0 6px;gap:6px;
+    background:repeating-linear-gradient(180deg,var(--chrome) 0 2px,#aeb0b4 2px 3px);
+    border-bottom:1px solid var(--chrome-lo);font-weight:700;
+  }
+  .palette .ptitle span{background:var(--chrome);padding:0 6px}
+  .palette .pbody{padding:6px;display:flex;flex-direction:column;gap:2px;background:var(--chrome)}
+  .prow{display:flex;align-items:center;gap:7px;padding:2px 4px}
+  .prow:hover{background:#b9bbbf}
+  .prow.on{background:#2a4a80;color:#fff}
+  .chipc{width:13px;height:13px;border:1px solid #55565a;flex:none}
+  .prow .pct{margin-left:auto;font-variant-numeric:tabular-nums}
+  .pgthumbs{display:flex;gap:8px;padding:4px}
+  .pgthumb{width:44px;height:32px;background:#fff;border:1px solid #55565a;position:relative}
+  .pgthumb.on{outline:2px solid #2a4a80}
+  .pgthumb::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:#d9d9dc}
+  .kv{display:flex;justify-content:space-between;padding:2px 4px}
+  .kv .well{background:#fff;border:1px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);padding:1px 6px;min-width:74px;text-align:right}
+  #palPages{top:44px}
+  #palSwatch{top:150px}
+  #palChar{top:360px}
+
+  /* ── Selection ───────────────────────── */
+  [data-node]{cursor:default}
+  [data-node]:hover{outline:1px dotted var(--cyan);outline-offset:2px}
+  .sel{position:fixed;pointer-events:none;z-index:50;display:none}
+  .sel.on{display:block}
+  .sel .frame{position:absolute;inset:0;border:1px solid var(--cyan)}
+  .sel i{position:absolute;width:6px;height:6px;background:#1d1d1f}
+  .s-nw{top:-3px;left:-3px}.s-n{top:-3px;left:calc(50% - 3px)}.s-ne{top:-3px;right:-3px}
+  .s-e{top:calc(50% - 3px);right:-3px}.s-se{bottom:-3px;right:-3px}
+  .s-s{bottom:-3px;left:calc(50% - 3px)}.s-sw{bottom:-3px;left:-3px}.s-w{top:calc(50% - 3px);left:-3px}
+
+  /* ── Status bar ──────────────────────── */
+  .status{
+    display:flex;align-items:center;gap:0;border-top:1px solid var(--chrome-hi);
+    background:var(--chrome);font-variant-numeric:tabular-nums;
+  }
+  .status .cell{padding:4px 12px;border-right:1px solid var(--chrome-lo);display:flex;gap:6px}
+  .status .cell b{font-weight:700}
+  .status .grow{flex:1;border:0}
+
+  .hint{
+    position:fixed;bottom:34px;left:20px;z-index:60;
+    background:#1d1d1f;color:#e9e9ea;font-size:10.5px;padding:6px 11px;letter-spacing:.02em;
+  }
+
+  @media (max-width:960px){
+    .palette,.hint{display:none}
+    .paste-inner{padding-left:20px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="menubar">
+  <span class="app">Pressroom</span>
+  <span>File</span><span>Edit</span><span>Layout</span><span>Type</span><span>Object</span><span>View</span><span>Window</span>
+  <div class="grow"></div>
+  <span>jack@pasteup</span>
+</nav>
+
+<div class="controls">
+  <div class="group"><span class="lbl">Document:</span> <b>jackherizsmith.com — Issue 02</b></div>
+  <div class="group"><span class="lbl">Spread:</span><span class="well">1–2 of 2</span></div>
+  <div class="group"><span class="lbl">Zoom:</span><span class="well">87.5%</span></div>
+  <div class="grow"></div>
+  <button class="btn">Preflight…</button>
+  <button class="btn primary">Publish…</button>
+</div>
+
+<div class="workspace">
+  <div class="corner"></div>
+  <div class="ruler h" aria-hidden="true"></div>
+  <div class="ruler v" aria-hidden="true"></div>
+
+  <main class="pasteboard" id="pasteboard">
+    <div class="paste-inner">
+
+      <div class="colourbar" aria-hidden="true">
+        <i style="background:#00a0cf"></i><i style="background:#e64ba0"></i><i style="background:#f4d519"></i>
+        <i style="background:#1d1d1f"></i><i style="background:#67c4e4"></i><i style="background:#f19ac9"></i>
+        <i style="background:#f9ea84"></i><i style="background:#8b8d92"></i>
+      </div>
+
+      <svg class="reg" viewBox="0 0 22 22" aria-hidden="true">
+        <circle cx="11" cy="11" r="6" fill="none" stroke="#2c2d30" stroke-width="1"/>
+        <path d="M11 0v22M0 11h22" stroke="#2c2d30" stroke-width="1"/>
+      </svg>
+
+      <div class="spread">
+        <section class="page cover">
+          <span class="crop c-tl"></span><span class="crop c-bl"></span>
+          <div class="margins" aria-hidden="true"></div>
+          <p class="eyebrow" data-node="Eyebrow">PORTFOLIO ANNUAL — ISSUE 02</p>
+          <h1 data-node="Masthead" id="firstSel">JACK</h1>
+          <div class="surname" data-node="Masthead · Surname">HERIZ-SMITH</div>
+          <p class="standfirst" data-node="Standfirst">Full-stack developer. Builds the whole thing — from the schema to the shadows.</p>
+          <div class="toc" data-node="Contents">
+            IN THIS ISSUE<br>
+            <b>SOURCERIE</b> · PRODUCT ENGINEERING<br>
+            <b>NOTES</b> · AI ON THE EDGE<br>
+            <b>ASK THE DATA</b> · ENGLISH IN, SQL OUT
+          </div>
+          <div class="barcode" data-node="Barcode" aria-hidden="true"></div>
+        </section>
+
+        <section class="page article">
+          <span class="crop c-tr"></span><span class="crop c-br"></span>
+          <div class="margins" aria-hidden="true"></div>
+          <div class="cols" aria-hidden="true"></div>
+          <h2 data-node="Headline">Recent work</h2>
+          <p class="rubric" data-node="Rubric">SET IN BASKERVILLE · ALIGNED TO A 14PT BASELINE GRID</p>
+          <div class="colwrap">
+            <p class="lead" data-node="Body · Lead">I design and build software end-to-end — web apps, data tools and AI services that people actually enjoy using. Currently building at Sourcerie, where the work runs from database schema to interface polish, with everything in between.</p>
+            <p class="entry" data-node="Body · Sourcerie"><b>Sourcerie.</b> Product engineering across a B2B platform — React, Node and Postgres, plus all the glue in between. Full-stack in the honest sense.</p>
+            <p class="entry" data-node="Body · Notes"><b>Notes.</b> An AI note-generation service on Cloudflare Workers: queues, KV, R2 and a deliberately tiny interface.</p>
+            <p class="entry" data-node="Body · Ask the data"><b>Ask the data.</b> Natural-language analytics. Plain-English questions in; carefully compiled SQL out.</p>
+            <p class="entry" data-node="Body · Contact"><b>Correspondence.</b> Letters to the editor are warmly received — GitHub, LinkedIn, or the classic: get in touch.</p>
+          </div>
+          <div class="folio"><span>02</span><span>JACKHERIZSMITH.COM</span><span>SUMMER 2026</span></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+    <div class="palette bevel" id="palPages">
+      <div class="ptitle"><span>Pages</span></div>
+      <div class="pbody">
+        <div class="prow">A-Master <span class="pct">§</span></div>
+        <div class="pgthumbs"><div class="pgthumb on"></div><div class="pgthumb"></div></div>
+      </div>
+    </div>
+
+    <div class="palette bevel" id="palSwatch">
+      <div class="ptitle"><span>Swatches</span></div>
+      <div class="pbody">
+        <div class="prow"><span class="chipc" style="background:#fff"></span> Paper <span class="pct">—</span></div>
+        <div class="prow on"><span class="chipc" style="background:#1d1d1f"></span> Ink Black <span class="pct">100</span></div>
+        <div class="prow"><span class="chipc" style="background:#00a0cf"></span> Process Cyan <span class="pct">100</span></div>
+        <div class="prow"><span class="chipc" style="background:#e64ba0"></span> Process Magenta <span class="pct">100</span></div>
+        <div class="prow"><span class="chipc" style="background:#f4d519"></span> Process Yellow <span class="pct">100</span></div>
+        <div class="prow"><span class="chipc" style="background:linear-gradient(45deg,#1d1d1f 25%,#00a0cf 25% 50%,#e64ba0 50% 75%,#f4d519 75%)"></span> Registration <span class="pct">✚</span></div>
+      </div>
+    </div>
+
+    <div class="palette bevel" id="palChar">
+      <div class="ptitle"><span>Character</span></div>
+      <div class="pbody">
+        <div class="kv"><span>Font</span><span class="well" id="chFont">Didot</span></div>
+        <div class="kv"><span>Style</span><span class="well">Regular</span></div>
+        <div class="kv"><span>Size</span><span class="well" id="chSize">128 pt</span></div>
+        <div class="kv"><span>Leading</span><span class="well" id="chLead">102 pt</span></div>
+        <div class="kv"><span>Tracking</span><span class="well">−10</span></div>
+      </div>
+    </div>
+</div>
+
+<footer class="status">
+  <div class="cell"><b id="stSel">Masthead</b></div>
+  <div class="cell">W: <b id="stW">86.2 mm</b></div>
+  <div class="cell">H: <b id="stH">27.1 mm</b></div>
+  <div class="cell">X: <b id="stX">10 mm</b> Y: <b id="stY">31 mm</b></div>
+  <div class="cell grow"></div>
+  <div class="cell">Basis: A-Master</div>
+  <div class="cell">No errors — ship it</div>
+</footer>
+
+<div class="sel" id="sel" aria-hidden="true">
+  <div class="frame"></div>
+  <i class="s-nw"></i><i class="s-n"></i><i class="s-ne"></i><i class="s-e"></i>
+  <i class="s-se"></i><i class="s-s"></i><i class="s-sw"></i><i class="s-w"></i>
+</div>
+
+<p class="hint">Click any frame on the spread — dimensions read out below, in millimetres, as is proper</p>
+
+<script>
+  const sel = document.getElementById('sel');
+  const MM = 0.2645833;
+  const spread = document.querySelector('.spread');
+  let current = null;
+
+  function select(el){
+    current = el;
+    const r = el.getBoundingClientRect();
+    sel.style.left = r.left + 'px'; sel.style.top = r.top + 'px';
+    sel.style.width = r.width + 'px'; sel.style.height = r.height + 'px';
+    sel.classList.add('on');
+    document.getElementById('stSel').textContent = el.dataset.node;
+    document.getElementById('stW').textContent = (r.width * MM).toFixed(1) + ' mm';
+    document.getElementById('stH').textContent = (r.height * MM).toFixed(1) + ' mm';
+    const s = spread.getBoundingClientRect();
+    document.getElementById('stX').textContent = Math.round((r.left - s.left) * MM) + ' mm';
+    document.getElementById('stY').textContent = Math.round((r.top - s.top) * MM) + ' mm';
+    const cs = getComputedStyle(el);
+    document.getElementById('chFont').textContent = cs.fontFamily.split(',')[0].replace(/"/g,'');
+    document.getElementById('chSize').textContent = Math.round(parseFloat(cs.fontSize) * 0.75) + ' pt';
+    document.getElementById('chLead').textContent = (cs.lineHeight === 'normal' ? '—' : Math.round(parseFloat(cs.lineHeight) * 0.75) + ' pt');
+  }
+
+  document.querySelectorAll('[data-node]').forEach(el=>{
+    el.addEventListener('click', e=>{ e.stopPropagation(); select(el); });
+  });
+  document.getElementById('pasteboard').addEventListener('click', ()=>{ sel.classList.remove('on'); current=null; });
+  addEventListener('keydown', e=>{ if(e.key==='Escape') sel.classList.remove('on'); });
+  addEventListener('resize', ()=>{ if(current) select(current); });
+  document.getElementById('pasteboard').addEventListener('scroll', ()=>{ if(current) select(current); }, {passive:true});
+
+  select(document.getElementById('firstSel'));
+</script>
+</body>
+</html>

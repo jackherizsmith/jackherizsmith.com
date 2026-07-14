@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jack Heriz-Smith · full-stack developer</title>
+<meta name="description" content="Jack Heriz-Smith builds software end-to-end: web apps, data tools and AI services. This site is also an editor: select, drag, rotate, break it, publish your remix.">
+<meta property="og:title" content="Jack Heriz-Smith · full-stack developer">
+<meta property="og:description" content="A portfolio that is also a design tool. Move things. Jack's cursor is in there somewhere.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+
+<header class="toolbar">
+  <div class="tool" id="menuBtn" title="Menu" aria-hidden="true">
+    <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+  </div>
+  <div class="file-chip">jackherizsmith.com <span class="badge" id="docBadge">v2 · live</span></div>
+  <div class="grow"></div>
+  <div class="tools" role="toolbar" aria-label="Tools">
+    <button class="tool on" id="toolMove" title="Move (V)"><svg viewBox="0 0 16 16"><path d="M4 2l9 7-4 1 2.5 4-2 1L7 11l-3 3z"/></svg></button>
+    <button class="tool" id="toolSticky" title="New sticky (S)"><svg viewBox="0 0 16 16"><path d="M2 2h12v8l-4 4H2zM10 14v-4h4"/></svg></button>
+    <button class="tool" id="toolUndo" title="Undo (⌘Z)" disabled><svg viewBox="0 0 16 16"><path d="M6 4L2 8l4 4M2 8h8a4 4 0 010 8"/></svg></button>
+    <button class="tool" id="toolRedo" title="Redo (⇧⌘Z)" disabled><svg viewBox="0 0 16 16"><path d="M10 4l4 4-4 4M14 8H6a4 4 0 000 8"/></svg></button>
+  </div>
+  <div class="grow"></div>
+  <div class="presence" aria-hidden="true"><i class="jack" title="Jack — editing">J</i><i class="you" title="You">You</i></div>
+  <button class="chrome-btn" id="resetBtn" hidden>Reset</button>
+  <span class="zoom">100%</span>
+  <button class="publish" id="publishBtn">Publish</button>
+</header>
+
+<div class="app">
+
+  <nav class="panel left" aria-label="Layers">
+    <h3>Layers</h3>
+    <div id="layersList"></div>
+  </nav>
+
+  <main class="canvas" id="canvas">
+    <div class="canvas-inner" id="canvasInner">
+
+      <svg class="wires" viewBox="0 0 1560 1400" aria-hidden="true">
+        <defs>
+          <marker id="head" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M1 1 L8 4.5 L1 8" fill="none" stroke="#c9a13e" stroke-width="1.6" stroke-linecap="round"/>
+          </marker>
+        </defs>
+        <path d="M240 520 C 280 570, 330 600, 386 560" fill="none" stroke="#c9a13e" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#head)"/>
+      </svg>
+
+      <p class="artboard-label" aria-hidden="true"><span class="dot"></span> v2 · live · Jack is editing</p>
+
+      <article class="artboard" id="artboard">
+        <p class="kicker" data-node="Kicker" data-id="kicker" data-text>Full-stack developer</p>
+        <h1 data-node="Heading" data-id="heading" data-text>Jack<br>Heriz-Smith</h1>
+        <p class="intro" data-node="Intro" data-id="intro" data-text>I design and build software end-to-end: web apps, data tools and AI services that people actually enjoy using. Currently building at Sourcerie. This site is an editor: select things, move them about, make it yours.</p>
+        <div class="actions">
+          <a class="btn" href="https://www.linkedin.com/in/jherizsmith/" data-node="Button · Contact" data-id="btn-contact" data-text>Get in touch</a>
+          <a class="btn ghost" href="https://www.jackherizsmith.com/Jack_Heriz-Smith_CV.pdf" data-node="Button · CV" data-id="btn-cv" data-text>Download CV</a>
+        </div>
+
+        <h2 data-node="Heading · Work" data-id="h-work" data-text>Recent work</h2>
+        <section class="work">
+          <div class="item" data-node="Card · Sourcerie" data-id="work-sourcerie">
+            <span class="name">Sourcerie</span>
+            <span class="desc" data-node="Text · Sourcerie blurb" data-id="work-sourcerie-desc" data-text>Product engineer on a B2B platform: React, Node, Postgres, and everything between the schema and the shadows.</span>
+          </div>
+        </section>
+
+        <h3 class="work-sub" data-node="Heading · Tools" data-id="h-tools" data-text>Tools I've built there, being rebuilt as public demos</h3>
+        <section class="work">
+          <div class="item" data-node="Card · Data" data-id="work-data">
+            <span class="name">Data <i class="tag">demo soon</i></span>
+            <span class="desc" data-node="Text · Data blurb" data-id="work-data-desc" data-text>Ask-the-database analytics: plain-English questions compiled into careful SQL.</span>
+          </div>
+          <div class="item" data-node="Card · Notes" data-id="work-notes">
+            <span class="name">Notes <i class="tag">demo soon</i></span>
+            <span class="desc" data-node="Text · Notes blurb" data-id="work-notes-desc" data-text>AI note generation on the edge: queues, KV, R2 and a deliberately tiny UI.</span>
+          </div>
+          <div class="item" data-node="Card · Pulse" data-id="work-pulse">
+            <span class="name">Pulse <i class="tag">demo soon</i></span>
+            <span class="desc" data-node="Text · Pulse blurb" data-id="work-pulse-desc" data-text>Tracks how AI assistants talk about a brand: weekly sweeps across answer engines, scored against competitors, with cited quick wins.</span>
+          </div>
+        </section>
+
+        <h3 class="work-sub" data-node="Heading · Clients" data-id="h-clients" data-text>Client work</h3>
+        <section class="work">
+          <a class="item" href="https://www.lydiasamuels.com/" data-node="Card · Lydia Samuels" data-id="client-lydia">
+            <span class="name">lydiasamuels.com ↗</span>
+            <span class="desc" data-node="Text · Lydia blurb" data-id="client-lydia-desc" data-text>Site for Lydia Samuels, performer, composer and arranger.</span>
+          </a>
+          <a class="item" href="https://www.torimarshtherapy.com/" data-node="Card · Tori Marsh" data-id="client-tori">
+            <span class="name">torimarshtherapy.com ↗</span>
+            <span class="desc" data-node="Text · Tori blurb" data-id="client-tori-desc" data-text>Site for Tori Marsh, art psychotherapist offering Art Therapy and EMDR across Suffolk, Norfolk and online.</span>
+          </a>
+        </section>
+
+        <h3 class="work-sub" data-node="Heading · Off the clock" data-id="h-side" data-text>Off the clock</h3>
+        <section class="work">
+          <a class="item" href="https://sweepr.online" data-node="Card · Sweepr" data-id="side-sweepr">
+            <span class="name">sweepr.online ↗</span>
+            <span class="desc" data-node="Text · Sweepr blurb" data-id="side-sweepr-desc" data-text>A daily minesweeper where the week sets the difficulty: Monday is a warm-up, Sunday is brutal. Vanilla JS, Cloudflare and one very moreish grid.</span>
+          </a>
+          <a class="item" href="https://github.com/jackherizsmith/claude-usage-tracker" data-node="Card · Claude Usage" data-id="side-usage">
+            <span class="name">Claude Usage ↗</span>
+            <span class="desc" data-node="Text · Claude Usage blurb" data-id="side-usage-desc" data-text>A menu bar app for macOS, Windows and Linux showing Claude Code usage limits in real time, with local analytics by project, branch and time of day.</span>
+          </a>
+        </section>
+
+        <div class="contact" data-node="Contact" data-id="contact">
+          <span data-node="Text · Sign-off" data-id="signoff" data-text>Let's build something good.</span>
+          <span class="links">
+            <a href="https://github.com/jackherizsmith">GitHub</a>
+            <a href="https://www.linkedin.com/in/jherizsmith/">LinkedIn</a>
+            <a href="https://www.jackherizsmith.com/Jack_Heriz-Smith_CV.pdf">CV</a>
+          </span>
+        </div>
+
+        <p class="mobile-note">On a desktop this page becomes an editor: layers, stickies, a second cursor called Jack. Worth the trip.</p>
+
+        <div class="empty-state" id="emptyState" hidden>
+          <p>You've deleted my entire career. Bold.</p>
+          <button class="chrome-btn" id="undoAllBtn">Undo everything</button>
+        </div>
+      </article>
+
+      <p class="artboard-label v1-label" aria-hidden="true">v1 · 2019 · locked</p>
+      <section class="artboard v1" id="artboard-v1" data-node="Frame · v1 (2019)" data-id="artboard-v1" aria-hidden="true">
+        <h2>I'm Jack, a full stack developer</h2>
+        <p>I solve problems and build things that bring joy to users. Have a look around and get in touch!</p>
+        <div class="chips"><i>HTML</i><i>CSS</i><i>Sass</i><i>JavaScript</i><i>React</i><i>Jest</i><i>Node.js</i><i>PostgreSQL</i></div>
+        <div class="blocks"><div></div><div></div><div></div><div></div></div>
+      </section>
+
+      <div class="sticky hand" data-node="Sticky · CV" data-id="sticky-cv" data-text>TODO: update CV
+(it still says 2020 lol) ✏️</div>
+      <div class="sticky mint hand" data-node="Sticky · the idea" data-id="sticky-idea" data-text>idea: the site IS the editor ✓
+
+select · drag · rotate ·
+break it · publish it</div>
+      <div class="sticky small hand" data-node="Sticky · humility" data-id="sticky-humility" data-text>keep v1 for humility</div>
+      <div class="arrow-label hand" data-node="Note · start here" data-id="arrow-label" data-text>start here!!</div>
+
+      <div id="overlay" aria-hidden="true">
+        <div id="guides"></div>
+        <div class="jack-sel" id="jackSel"><div class="frame"></div><div class="tag">Jack</div></div>
+        <div class="sel-box" id="selBox">
+          <div class="sel-frame"></div>
+          <div class="rotate" data-handle="rotate"></div>
+          <div class="handle h-nw" data-handle="nw"></div><div class="handle h-n" data-handle="n"></div>
+          <div class="handle h-ne" data-handle="ne"></div><div class="handle h-e" data-handle="e"></div>
+          <div class="handle h-se" data-handle="se"></div><div class="handle h-s" data-handle="s"></div>
+          <div class="handle h-sw" data-handle="sw"></div><div class="handle h-w" data-handle="w"></div>
+          <div class="dims" id="dims"></div>
+        </div>
+        <div class="jack-cursor" id="jackCursor">
+          <svg viewBox="0 0 16 16"><path d="M2 1l4 13 2.5-5L14 7z" fill="#12b76a" stroke="#fff" stroke-width="1"/></svg>
+          <div class="tag">Jack</div>
+          <div class="jack-bubble" id="jackBubble"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="panel right" aria-label="Inspector">
+    <div class="insp-section">
+      <h3 id="selName">Nothing selected</h3>
+      <div class="row">
+        <div class="field"><label>X</label><span class="val" id="fX">—</span></div>
+        <div class="field"><label>Y</label><span class="val" id="fY">—</span></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>W</label><span class="val" id="fW">—</span></div>
+        <div class="field"><label>H</label><span class="val" id="fH">—</span></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>⟲</label><span class="val" id="fR">—</span></div>
+        <div class="field fill-field"><label for="fillInput">Colour</label><input type="color" id="fillInput" value="#17191c" disabled></div>
+      </div>
+    </div>
+    <div class="insp-section">
+      <h3>Typography</h3>
+      <div class="kv"><span>Font</span><b id="tFont">—</b></div>
+      <div class="kv"><span>Size</span><b id="tSize">—</b></div>
+    </div>
+    <div class="insp-section">
+      <h3>Collaboration</h3>
+      <div class="kv"><span class="dot-jack">● Jack</span><b id="jackStatus">pottering about</b></div>
+      <div class="kv"><span class="dot-you">● You</span><b id="youStatus">have the good cursor</b></div>
+    </div>
+    <div class="insp-section">
+      <h3>This file</h3>
+      <div class="kv"><span>Edits</span><b id="editCount">none yet</b></div>
+      <div class="kv"><span>Saved</span><b>to your browser</b></div>
+    </div>
+  </aside>
+
+</div>
+
+<p class="hint" id="hint">Click anything to select it · double-click text to rewrite it · <b>⌘Z forgives everything</b></p>
+<div class="toast" id="toast" role="status"></div>
+
+<noscript>
+  <style>.toolbar,.panel,.hint,#overlay,.artboard-label,.sticky,.arrow-label,.wires,.v1{display:none!important}
+  .canvas-inner{width:auto!important;height:auto!important}
+  .artboard{position:static!important;margin:40px auto!important}</style>
+</noscript>
+
+</body>
+</html>

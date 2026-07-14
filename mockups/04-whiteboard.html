@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 · Whiteboard — jackherizsmith.com concept</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --ink:#2b2f36; --muted:#7a828c; --select:#3b82f6;
+    --card:#ffffff; --line:#e3e6ea;
+    --sticky-yellow:#fef3a8; --sticky-mint:#c9f2dd; --marker-red:#e5484d;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:"Avenir Next",Avenir,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink);background:var(--bg);overflow:hidden;font-size:14px;
+  }
+  .hand{font-family:"Chalkboard SE",Chalkboard,"Comic Sans MS",cursive}
+
+  .viewport{position:absolute;inset:0;overflow:auto}
+  .board{
+    position:relative;width:1560px;height:1010px;
+    background-image:radial-gradient(circle,#d6dae0 1.2px,transparent 1.2px);
+    background-size:26px 26px;
+  }
+  .wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+  /* ── Board objects ───────────────────── */
+  .obj{position:absolute;cursor:default}
+  .obj:hover{filter:drop-shadow(0 0 1.5px rgba(59,130,246,.8))}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 2px 6px rgba(25,32,44,.06),0 12px 28px rgba(25,32,44,.07);
+    padding:22px 24px;
+  }
+
+  .hero{left:420px;top:250px;width:400px}
+  .hero .row{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  .hero .face{
+    width:52px;height:52px;border-radius:50%;flex:none;
+    background:conic-gradient(from 210deg,#ffd88a,#f8a76b,#e88ab0,#8ab8f8,#8ae0c8,#ffd88a);
+    display:grid;place-items:center;font-weight:700;font-size:19px;color:#fff;
+    text-shadow:0 1px 2px rgba(0,0,0,.25);
+  }
+  .hero h1{font-size:25px;font-weight:700;letter-spacing:-.01em}
+  .hero .role{color:var(--muted);font-size:13px;font-weight:500}
+  .hero p{font-size:14px;line-height:1.55;color:#4a5058}
+  .hero .tags{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+  .hero .tags i{
+    font-style:normal;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;
+    background:#eef1f5;color:#5a6470;
+  }
+
+  .work{width:300px;padding:18px 20px}
+  .work h2{font-size:15px;font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+  .work h2 .dot{width:9px;height:9px;border-radius:3px;flex:none}
+  .work p{font-size:12.5px;line-height:1.5;color:#5a6068}
+  .work .open{margin-top:10px;font-size:12px;font-weight:600;color:var(--select)}
+  .w1{left:1010px;top:120px;transform:rotate(1.6deg)}
+  .w2{left:1080px;top:420px;transform:rotate(-1.2deg)}
+  .w3{left:960px;top:700px;transform:rotate(.8deg)}
+
+  .sticky{
+    width:180px;min-height:150px;padding:16px;font-size:14.5px;line-height:1.45;
+    box-shadow:0 6px 14px rgba(25,32,44,.14);color:#4c4630;
+  }
+  .s1{left:150px;top:480px;background:var(--sticky-yellow);transform:rotate(-3deg)}
+  .s2{left:620px;top:60px;background:var(--sticky-mint);transform:rotate(2deg);color:#2c503e;min-height:120px;width:200px}
+  .sticky .tick{display:block;margin-top:8px;font-size:18px}
+
+  .contact{left:430px;top:690px;width:380px;display:flex;align-items:center;gap:16px;position:absolute}
+  .contact .cta{
+    position:relative;background:var(--ink);color:#fff;font-weight:600;font-size:14px;
+    padding:11px 20px;border-radius:10px;cursor:pointer;flex:none;
+  }
+  .contact .cta svg{
+    position:absolute;inset:-14px -18px;width:calc(100% + 36px);height:calc(100% + 28px);
+    pointer-events:none;overflow:visible;
+  }
+  .contact .links{display:flex;gap:14px;font-size:13px;font-weight:600;color:#5a6470}
+  .contact .links span{cursor:pointer;text-decoration:underline;text-decoration-color:#c8cdd4;text-underline-offset:3px}
+
+  .note-arrow-label{position:absolute;left:250px;top:432px;font-size:13px;color:#8a641f;transform:rotate(-4deg)}
+
+  /* ── Selection (tldraw style) ────────── */
+  .sel{position:fixed;pointer-events:none;z-index:60;display:none}
+  .sel.on{display:block}
+  .sel .frame{position:absolute;inset:-4px;border:2px solid var(--select);border-radius:8px}
+  .sel .h{
+    position:absolute;width:11px;height:11px;border-radius:50%;
+    background:#fff;border:2px solid var(--select);box-shadow:0 1px 3px rgba(0,0,0,.18);
+  }
+  .h-nw{top:-9px;left:-9px}.h-ne{top:-9px;right:-9px}.h-se{bottom:-9px;right:-9px}.h-sw{bottom:-9px;left:-9px}
+  .sel .rot{
+    position:absolute;top:-34px;left:50%;width:12px;height:12px;border-radius:50%;
+    background:#fff;border:2px solid var(--select);transform:translateX(-50%);
+    box-shadow:0 1px 3px rgba(0,0,0,.18);
+  }
+  .sel .rot::after{content:"";position:absolute;top:12px;left:4px;width:2px;height:16px;background:var(--select)}
+
+  /* ── Chrome ──────────────────────────── */
+  .chip{
+    position:fixed;top:16px;left:16px;z-index:70;display:flex;align-items:center;gap:9px;
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 14px;
+    box-shadow:0 4px 14px rgba(25,32,44,.08);font-weight:600;font-size:13px;
+  }
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:#34c98e}
+  .chip .muted{color:var(--muted);font-weight:500}
+
+  .topright{position:fixed;top:16px;right:16px;z-index:70;display:flex;gap:10px;align-items:center}
+  .avatars{display:flex}
+  .avatars i{
+    width:30px;height:30px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;
+    font-style:normal;font-size:11px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(25,32,44,.15);
+  }
+  .avatars i:nth-child(1){background:#f59e0b}
+  .avatars i:nth-child(2){background:#34c98e;margin-left:-8px}
+  .publish{
+    background:var(--select);color:#fff;border:0;font:inherit;font-weight:700;font-size:13.5px;
+    padding:10px 18px;border-radius:12px;cursor:pointer;box-shadow:0 6px 16px rgba(59,130,246,.35);
+  }
+  .publish:hover{background:#2f6fe0}
+
+  .toolbar{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:70;
+    display:flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--line);
+    border-radius:16px;padding:7px;box-shadow:0 10px 30px rgba(25,32,44,.14);
+  }
+  .toolbar .t{
+    width:40px;height:40px;border-radius:11px;display:grid;place-items:center;cursor:pointer;color:#4a5058;
+  }
+  .toolbar .t:hover{background:#f0f3f6}
+  .toolbar .t.on{background:var(--select);color:#fff}
+  .toolbar .t svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .toolbar .sep{width:1px;height:26px;background:var(--line);margin:0 5px}
+  .toolbar .c{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+
+  .zoom{
+    position:fixed;bottom:18px;left:16px;z-index:70;display:flex;align-items:center;gap:2px;
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:5px 8px;
+    box-shadow:0 4px 14px rgba(25,32,44,.08);font-weight:600;font-size:12.5px;color:#4a5058;
+  }
+  .zoom span{padding:3px 7px;border-radius:7px;cursor:pointer}
+  .zoom span:hover{background:#f0f3f6}
+
+  .minimap{
+    position:fixed;bottom:18px;right:16px;z-index:70;width:150px;height:96px;
+    background:#fff;border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 4px 14px rgba(25,32,44,.08);overflow:hidden;
+  }
+  .minimap i{position:absolute;background:#ccd3db;border-radius:2px}
+  .minimap .vp{position:absolute;border:1.5px solid var(--select);border-radius:3px;background:rgba(59,130,246,.07)}
+
+  .stylepanel{
+    position:fixed;top:74px;right:16px;z-index:70;width:200px;
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;
+    box-shadow:0 10px 30px rgba(25,32,44,.13);font-size:12px;
+  }
+  .stylepanel .selname{font-weight:700;font-size:12.5px;margin-bottom:10px;color:var(--ink)}
+  .stylepanel h4{color:var(--muted);font-weight:600;margin:10px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+  .fills{display:flex;gap:7px}
+  .fills i{width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+  .fills i.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--select)}
+  .sizes{display:flex;background:#f0f3f6;border-radius:9px;padding:3px}
+  .sizes span{flex:1;text-align:center;padding:4px 0;border-radius:7px;font-weight:700;color:#7a828c;cursor:pointer}
+  .sizes span.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+  .hint{
+    position:fixed;bottom:74px;left:50%;transform:translateX(-50%);z-index:70;
+    background:var(--ink);color:#eef1f5;font-size:11.5px;padding:7px 12px;border-radius:9px;opacity:.92;
+  }
+
+  @media (max-width:900px){
+    .stylepanel,.minimap,.hint,.zoom{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="viewport" id="viewport">
+  <div class="board" id="board">
+
+    <svg class="wires" viewBox="0 0 1560 1010" aria-hidden="true">
+      <defs>
+        <marker id="head" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M1 1 L8 4.5 L1 8" fill="none" stroke="#8b949e" stroke-width="1.6" stroke-linecap="round"/>
+        </marker>
+      </defs>
+      <path d="M828 320 C 920 290, 940 240, 1000 205" fill="none" stroke="#8b949e" stroke-width="2.2" marker-end="url(#head)"/>
+      <path d="M828 400 C 930 420, 980 460, 1068 480" fill="none" stroke="#8b949e" stroke-width="2.2" marker-end="url(#head)"/>
+      <path d="M780 470 C 850 580, 880 660, 948 738" fill="none" stroke="#8b949e" stroke-width="2.2" marker-end="url(#head)"/>
+      <path d="M610 500 C 590 570, 580 620, 590 678" fill="none" stroke="#8b949e" stroke-width="2.2" stroke-dasharray="7 7" marker-end="url(#head)"/>
+      <path d="M340 545 C 380 530, 400 490, 425 420" fill="none" stroke="#c9a13e" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#head)"/>
+    </svg>
+
+    <div class="obj card hero" data-node="Card · Hello" id="firstSel">
+      <div class="row">
+        <div class="face">J</div>
+        <div>
+          <h1>Jack Heriz-Smith</h1>
+          <div class="role">Full-stack developer · Sourcerie</div>
+        </div>
+      </div>
+      <p>I design and build software end-to-end — web apps, data tools and AI services that people actually enjoy using. This board is my site: have a rummage, move things about.</p>
+      <div class="tags"><i>React</i><i>Node</i><i>Postgres</i><i>Cloudflare</i><i>AI</i></div>
+    </div>
+
+    <div class="obj card work w1" data-node="Card · Sourcerie">
+      <h2><span class="dot" style="background:#f59e0b"></span>Sourcerie</h2>
+      <p>Product engineering across a B2B platform — React, Node, Postgres, and all the glue in between.</p>
+      <div class="open">Open project ↗</div>
+    </div>
+
+    <div class="obj card work w2" data-node="Card · Notes">
+      <h2><span class="dot" style="background:#34c98e"></span>Notes</h2>
+      <p>AI note generation on Cloudflare Workers — queues, KV, R2 and a deliberately tiny UI.</p>
+      <div class="open">Open project ↗</div>
+    </div>
+
+    <div class="obj card work w3" data-node="Card · Ask the data">
+      <h2><span class="dot" style="background:#8b7cf6"></span>Ask the data</h2>
+      <p>Natural-language analytics — plain-English questions compiled to SQL over Postgres.</p>
+      <div class="open">Open project ↗</div>
+    </div>
+
+    <div class="obj card sticky s1 hand" data-node="Sticky note">
+      TODO: update CV<br>(it still says 2020&nbsp;lol)
+      <span class="tick">✏️</span>
+    </div>
+
+    <div class="obj card sticky s2 hand" data-node="Sticky note">
+      idea: the site IS the editor <span class="tick" style="display:inline;margin:0">✓</span>
+    </div>
+
+    <div class="obj contact" data-node="Frame · Contact">
+      <span class="cta">
+        Get in touch
+        <svg viewBox="0 0 136 52" aria-hidden="true">
+          <path d="M14 26 C 10 8, 92 2, 118 12 C 140 21, 122 46, 66 48 C 28 49, 6 42, 12 24"
+                fill="none" stroke="var(--marker-red)" stroke-width="2.6" stroke-linecap="round" opacity=".85"/>
+        </svg>
+      </span>
+      <div class="links"><span>GitHub</span><span>LinkedIn</span><span>CV</span></div>
+    </div>
+
+    <div class="note-arrow-label hand">start here!!</div>
+  </div>
+</div>
+
+<div class="sel" id="sel" aria-hidden="true">
+  <div class="frame"></div>
+  <div class="rot"></div>
+  <div class="h h-nw"></div><div class="h h-ne"></div><div class="h h-se"></div><div class="h h-sw"></div>
+</div>
+
+<div class="chip"><span class="dot"></span> jackherizsmith<span class="muted">.board</span></div>
+
+<div class="topright">
+  <div class="avatars"><i>J</i><i>You</i></div>
+  <button class="publish">Publish</button>
+</div>
+
+<div class="stylepanel" id="stylepanel">
+  <div class="selname" id="selName">Card · Hello</div>
+  <h4>Fill</h4>
+  <div class="fills">
+    <i class="on" style="background:#ffffff"></i>
+    <i style="background:var(--sticky-yellow)"></i>
+    <i style="background:var(--sticky-mint)"></i>
+    <i style="background:#dbe9ff"></i>
+    <i style="background:#ffd9e0"></i>
+  </div>
+  <h4>Size</h4>
+  <div class="sizes"><span>S</span><span class="on">M</span><span>L</span><span>XL</span></div>
+  <h4>Rotation</h4>
+  <div class="sizes"><span id="rotVal" class="on" style="flex:2">0°</span><span>↺</span><span>↻</span></div>
+</div>
+
+<div class="toolbar" role="toolbar" aria-label="Tools">
+  <div class="t on" title="Select (V)"><svg viewBox="0 0 18 18"><path d="M4 2l10 8-4.5 1L12 15.5l-2.5 1L7 12l-3 3z"/></svg></div>
+  <div class="t" title="Hand (H)"><svg viewBox="0 0 18 18"><path d="M6 9V4a1 1 0 012 0v4m0-5a1 1 0 012 0v5m0-4a1 1 0 012 0v6m0-3a1 1 0 012 0v3a6 6 0 01-6 6h-1a6 6 0 01-5-2.5L4 11a1.3 1.3 0 012-1z"/></svg></div>
+  <div class="t" title="Draw (D)"><svg viewBox="0 0 18 18"><path d="M3 15c0-3 2-4 4-6s2-4 5-4c2.5 0 3.5 2.5 1.5 4.5S8 12 6.5 14 3 16 3 15z"/></svg></div>
+  <div class="t" title="Text (T)"><svg viewBox="0 0 18 18"><path d="M4 4h10M9 4v10"/></svg></div>
+  <div class="t" title="Sticky (S)"><svg viewBox="0 0 18 18"><path d="M3 3h12v7l-5 5H3zM10 15v-5h5"/></svg></div>
+  <div class="t" title="Shape (R)"><svg viewBox="0 0 18 18"><rect x="3" y="4" width="12" height="10" rx="2"/></svg></div>
+  <div class="t" title="Arrow (A)"><svg viewBox="0 0 18 18"><path d="M4 14L14 4M14 4v6M14 4H8"/></svg></div>
+  <div class="sep"></div>
+  <div class="c" style="background:#2b2f36"></div>
+  <div class="c" style="background:#3b82f6"></div>
+  <div class="c" style="background:#e5484d"></div>
+  <div class="c" style="background:#f59e0b"></div>
+</div>
+
+<div class="zoom"><span>−</span> 100% <span>＋</span></div>
+
+<div class="minimap" aria-hidden="true">
+  <i style="left:40px;top:26px;width:26px;height:16px"></i>
+  <i style="left:74px;top:12px;width:19px;height:11px"></i>
+  <i style="left:78px;top:42px;width:19px;height:11px"></i>
+  <i style="left:70px;top:66px;width:19px;height:11px"></i>
+  <i style="left:14px;top:48px;width:12px;height:12px"></i>
+  <i style="left:44px;top:66px;width:22px;height:8px"></i>
+  <div class="vp" style="left:28px;top:8px;width:86px;height:74px"></div>
+</div>
+
+<p class="hint">Click any card or sticky · everything on this board is a real, movable object</p>
+
+<script>
+  const sel = document.getElementById('sel');
+  const selName = document.getElementById('selName');
+  const rotVal = document.getElementById('rotVal');
+  const viewport = document.getElementById('viewport');
+  let current = null;
+
+  function select(el){
+    current = el;
+    const r = el.getBoundingClientRect();
+    sel.style.left = r.left + 'px';
+    sel.style.top = r.top + 'px';
+    sel.style.width = r.width + 'px';
+    sel.style.height = r.height + 'px';
+    sel.classList.add('on');
+    selName.textContent = el.dataset.node;
+    const m = (el.style.transform || getComputedStyle(el).transform);
+    let deg = 0;
+    if (m && m !== 'none' && m.startsWith('matrix')){
+      const v = m.slice(7,-1).split(',').map(Number);
+      deg = Math.round(Math.atan2(v[1], v[0]) * 180 / Math.PI * 10) / 10;
+    }
+    rotVal.textContent = deg + '°';
+  }
+
+  document.querySelectorAll('[data-node]').forEach(el=>{
+    el.addEventListener('click', e=>{ e.stopPropagation(); select(el); });
+  });
+  document.getElementById('board').addEventListener('click', ()=>{ sel.classList.remove('on'); current=null; });
+  addEventListener('keydown', e=>{ if(e.key==='Escape') sel.classList.remove('on'); });
+  addEventListener('resize', ()=>{ if(current) select(current); });
+  viewport.addEventListener('scroll', ()=>{ if(current) select(current); }, {passive:true});
+
+  viewport.scrollLeft = 60;
+  select(document.getElementById('firstSel'));
+</script>
+</body>
+</html>

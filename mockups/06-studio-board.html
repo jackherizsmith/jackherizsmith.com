@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 · Studio Board — jackherizsmith.com concept</title>
+<style>
+  :root{
+    --chrome:#ffffff; --chrome-line:#e6e8ec; --ink:#1c1e21; --ink-2:#6b7076;
+    --canvas:#f0f2f5; --select:#0d99ff; --jack:#12b76a;
+    --sticky-yellow:#fef3a8; --sticky-mint:#c9f2dd;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:12px;color:var(--ink);background:var(--canvas);
+    display:grid;grid-template-rows:48px 1fr;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .hand{font-family:"Chalkboard SE",Chalkboard,"Comic Sans MS",cursive}
+
+  /* ── Toolbar ─────────────────────────── */
+  .toolbar{
+    background:var(--chrome);border-bottom:1px solid var(--chrome-line);
+    display:flex;align-items:center;gap:8px;padding:0 12px;z-index:30;
+  }
+  .toolbar .grow{flex:1}
+  .file-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-weight:600}
+  .file-chip:hover{background:#f2f4f7}
+  .file-chip .caret{color:var(--ink-2);font-size:9px}
+  .badge{font-weight:500;color:var(--ink-2);background:#f2f4f7;border-radius:4px;padding:2px 6px;font-size:11px}
+  .tools{display:flex;gap:2px;padding:2px;border-radius:8px}
+  .tool{width:32px;height:32px;border-radius:6px;display:grid;place-items:center;color:var(--ink-2);cursor:pointer}
+  .tool:hover{background:#f2f4f7;color:var(--ink)}
+  .tool.on{background:var(--select);color:#fff}
+  .tool svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+  .presence{display:flex;margin-right:2px}
+  .presence i{
+    width:26px;height:26px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;
+    font-style:normal;font-size:10px;font-weight:700;color:#fff;box-shadow:0 1px 4px rgba(20,30,40,.18);
+  }
+  .presence i.jack{background:var(--jack)}
+  .presence i.you{background:var(--select);margin-left:-7px}
+  .zoom{color:var(--ink-2);padding:4px 8px;border-radius:6px}
+  .zoom:hover{background:#f2f4f7}
+  .publish{
+    background:var(--select);color:#fff;border:0;font:inherit;font-weight:600;
+    padding:7px 14px;border-radius:6px;cursor:pointer;
+  }
+  .publish:hover{background:#0b87e0}
+
+  /* ── Panels ──────────────────────────── */
+  .app{display:grid;grid-template-columns:240px 1fr 264px;min-height:0}
+  .panel{background:var(--chrome);overflow-y:auto;position:relative;z-index:20}
+  .panel.left{border-right:1px solid var(--chrome-line)}
+  .panel.right{border-left:1px solid var(--chrome-line)}
+  .panel h3{
+    font-size:11px;font-weight:600;color:var(--ink);
+    padding:12px 12px 8px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel h3 span{color:var(--ink-2);font-weight:400}
+  .layer{display:flex;align-items:center;gap:7px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+  .layer:hover{background:#f2f4f7}
+  .layer.sel{background:#e5f1fd;color:#0b6bbd}
+  .layer.jacksel{box-shadow:inset 2px 0 0 var(--jack)}
+  .layer .icon{width:13px;text-align:center;color:var(--ink-2);font-size:10px;flex:none}
+  .layer.sel .icon{color:#0b6bbd}
+  .layer .lock{margin-left:auto;color:#b6bac0;font-size:10px}
+  .indent-1{padding-left:28px}.indent-2{padding-left:44px}
+  .layer.page{font-weight:600}
+  .layer.muted{color:#9aa0a6}
+
+  .insp-section{border-bottom:1px solid var(--chrome-line);padding-bottom:12px}
+  .row{display:flex;gap:8px;padding:2px 12px}
+  .field{
+    flex:1;display:flex;align-items:center;gap:6px;background:#f2f4f7;
+    border:1px solid transparent;border-radius:6px;padding:5px 8px;
+  }
+  .field:hover{border-color:#d8dce1}
+  .field label{color:var(--ink-2);font-size:10px;width:12px;flex:none}
+  .field .val{font-variant-numeric:tabular-nums}
+  .swatch{width:16px;height:16px;border-radius:4px;border:1px solid rgba(0,0,0,.15);flex:none}
+  .kv{display:flex;justify-content:space-between;padding:4px 12px;color:var(--ink-2)}
+  .kv b{color:var(--ink);font-weight:500}
+
+  /* ── Canvas ──────────────────────────── */
+  .canvas{
+    position:relative;overflow:auto;
+    background-image:radial-gradient(circle,#d3d8de 1px,transparent 1px);
+    background-size:22px 22px;
+  }
+  .canvas-inner{position:relative;width:1560px;height:1180px;padding:0}
+
+  .artboard-label{font-size:11px;color:#7d838a;display:flex;gap:6px;align-items:center;position:absolute}
+  .artboard-label .dot{width:6px;height:6px;border-radius:50%;background:var(--jack)}
+  .artboard{position:absolute;background:#fff;border-radius:2px;box-shadow:0 1px 3px rgba(20,30,40,.10),0 8px 28px rgba(20,30,40,.08)}
+
+  /* v2 document */
+  #label-v2{left:394px;top:64px}
+  #artboard-v2{left:392px;top:84px;width:720px;padding:64px 72px 56px}
+  .doc{font-size:15px;color:#3c4147;line-height:1.65}
+  .doc .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a9099;margin-bottom:16px}
+  .doc h1{
+    font-family:ui-serif,"New York",Georgia,serif;font-weight:600;
+    font-size:54px;line-height:1.04;letter-spacing:-.015em;color:#17191c;margin-bottom:20px;
+  }
+  .doc .intro{max-width:500px;margin-bottom:24px}
+  .doc .actions{display:flex;gap:10px;margin-bottom:48px}
+  .doc .btn{font-size:13px;font-weight:600;padding:9px 16px;border-radius:8px;background:#17191c;color:#fff}
+  .doc .btn.ghost{background:#fff;color:#17191c;border:1px solid #d8dce1}
+  .doc h2{font-family:ui-serif,"New York",Georgia,serif;font-weight:600;font-size:22px;color:#17191c;margin-bottom:14px}
+  .work{display:grid;gap:2px;margin-bottom:44px}
+  .work .item{display:grid;grid-template-columns:140px 1fr;gap:16px;padding:14px 12px;border-radius:10px}
+  .work .item:hover{background:#f6f8fa}
+  .work .name{font-weight:650;color:#17191c;font-size:15px}
+  .work .desc{color:#5a6067;font-size:14px;line-height:1.55}
+  .doc .contact{display:flex;align-items:center;gap:16px;border-top:1px solid #eceef1;padding-top:24px}
+  .doc .contact .links{margin-left:auto;display:flex;gap:14px;font-size:13px;color:#5a6067}
+  .doc .contact .links u{text-decoration-color:#c3c9d0;text-underline-offset:3px;cursor:pointer}
+
+  /* v1 ghost artboard */
+  #label-v1{left:1216px;top:120px}
+  #artboard-v1{left:1214px;top:140px;width:250px;padding:22px 18px;opacity:.6;filter:saturate(.4)}
+  #artboard-v1 h1{font-size:15px;margin-bottom:7px}
+  #artboard-v1 p{font-size:9px;color:#666;line-height:1.5;margin-bottom:10px}
+  #artboard-v1 .chips{display:flex;flex-wrap:wrap;gap:4px}
+  #artboard-v1 .chips i{font-style:normal;font-size:8px;border:1px solid #ccc;border-radius:3px;padding:2px 5px;color:#888}
+  #artboard-v1 .blocks{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px}
+  #artboard-v1 .blocks div{height:42px;background:#e8eaed;border-radius:3px}
+
+  /* whiteboard satellites */
+  .sticky{
+    position:absolute;width:170px;padding:15px;font-size:14px;line-height:1.45;
+    box-shadow:0 5px 12px rgba(25,32,44,.16);color:#4c4630;cursor:default;
+  }
+  #sticky-cv{left:150px;top:150px;background:var(--sticky-yellow);transform:rotate(-3deg)}
+  #sticky-idea{left:130px;top:430px;background:var(--sticky-mint);transform:rotate(2deg);color:#2c503e;width:186px}
+  #sticky-humility{left:1246px;top:392px;background:var(--sticky-yellow);transform:rotate(3deg);width:150px;font-size:13px}
+  .arrow-label{position:absolute;left:236px;top:610px;font-size:14px;color:#8a641f;transform:rotate(-5deg)}
+
+  .wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+  [data-node]{cursor:default}
+  .doc [data-node]:hover,.sticky:hover,#artboard-v1:hover{outline:1px solid rgba(13,153,255,.65);outline-offset:2px}
+
+  /* ── Your selection ──────────────────── */
+  .sel-box{position:absolute;pointer-events:none;z-index:25;display:none}
+  .sel-box.on{display:block}
+  .sel-frame{position:absolute;inset:0;border:1.5px solid var(--select)}
+  .handle{position:absolute;width:8px;height:8px;background:#fff;border:1.5px solid var(--select);border-radius:1.5px}
+  .h-nw{top:-5px;left:-5px}.h-n{top:-5px;left:calc(50% - 4px)}.h-ne{top:-5px;right:-5px}
+  .h-e{top:calc(50% - 4px);right:-5px}.h-se{bottom:-5px;right:-5px}
+  .h-s{bottom:-5px;left:calc(50% - 4px)}.h-sw{bottom:-5px;left:-5px}.h-w{top:calc(50% - 4px);left:-5px}
+  .rotate{
+    position:absolute;top:-26px;left:calc(50% - 5px);width:10px;height:10px;
+    border:1.5px solid var(--select);border-radius:50%;background:#fff;
+  }
+  .rotate::after{content:"";position:absolute;top:9px;left:3px;width:1.5px;height:11px;background:var(--select)}
+  .dims{
+    position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+    background:var(--select);color:#fff;font-size:10px;font-weight:600;
+    padding:2px 6px;border-radius:3px;white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+
+  /* ── Jack: cursor, selection, chat ───── */
+  .jack-cursor{position:absolute;z-index:28;pointer-events:none;will-change:transform}
+  .jack-cursor svg{width:15px;height:15px;display:block}
+  .jack-cursor .tag{
+    background:var(--jack);color:#fff;font-size:10px;font-weight:600;
+    padding:2px 6px;border-radius:3px;margin:2px 0 0 10px;width:max-content;
+  }
+  .jack-bubble{
+    position:absolute;margin:4px 0 0 10px;max-width:190px;width:max-content;
+    background:#fff;border:1.5px solid var(--jack);color:#1c1e21;border-radius:10px;border-top-left-radius:3px;
+    padding:6px 10px;font-size:11.5px;line-height:1.4;box-shadow:0 4px 14px rgba(20,30,40,.14);
+    opacity:0;transition:opacity .25s;
+  }
+  .jack-bubble.on{opacity:1}
+  .jack-sel{position:absolute;pointer-events:none;z-index:24;display:none}
+  .jack-sel.on{display:block}
+  .jack-sel .frame{position:absolute;inset:0;border:1.5px solid var(--jack)}
+  .jack-sel .tag{
+    position:absolute;bottom:calc(100% + 4px);left:-1px;background:var(--jack);color:#fff;
+    font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;
+  }
+
+  .hint{
+    position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:40;
+    background:#17191c;color:#dfe3e8;font-size:11px;padding:7px 12px;border-radius:8px;opacity:.92;
+  }
+  .hint b{color:#fff}
+
+  @media (max-width:900px){
+    .panel,.hint{display:none}
+    .app{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <div class="tool" title="Main menu">
+    <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+  </div>
+  <div class="file-chip">jackherizsmith.com <span class="badge">v2 · draft</span> <span class="caret">▾</span></div>
+  <div class="grow"></div>
+  <div class="tools" role="toolbar" aria-label="Tools">
+    <div class="tool on" title="Move (V)"><svg viewBox="0 0 16 16"><path d="M4 2l9 7-4 1 2.5 4-2 1L7 11l-3 3z"/></svg></div>
+    <div class="tool" title="Frame (F)"><svg viewBox="0 0 16 16"><path d="M4 1v14M12 1v14M1 4h14M1 12h14"/></svg></div>
+    <div class="tool" title="Text (T)"><svg viewBox="0 0 16 16"><path d="M3 3h10M8 3v10"/></svg></div>
+    <div class="tool" title="Sticky (S)"><svg viewBox="0 0 16 16"><path d="M2 2h12v8l-4 4H2zM10 14v-4h4"/></svg></div>
+    <div class="tool" title="Comment (C)"><svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 01-6 6H2l1.5-2.5A6 6 0 1114 8z"/></svg></div>
+  </div>
+  <div class="grow"></div>
+  <div class="presence"><i class="jack" title="Jack — editing">J</i><i class="you" title="You">You</i></div>
+  <div class="zoom">100% ▾</div>
+  <button class="publish">Publish</button>
+</header>
+
+<div class="app">
+
+  <nav class="panel left" aria-label="Layers">
+    <h3>Layers <span>Pages ▾</span></h3>
+    <div class="layer page"><span class="icon">▦</span> Page 1</div>
+    <div class="layer indent-1"><span class="icon">#</span> v2 — draft</div>
+    <div class="layer indent-2" data-for="heading"><span class="icon">T</span> Heading</div>
+    <div class="layer indent-2" data-for="intro"><span class="icon">T</span> Intro</div>
+    <div class="layer indent-2" data-for="work-sourcerie"><span class="icon">▢</span> Card · Sourcerie</div>
+    <div class="layer indent-2" data-for="work-notes"><span class="icon">▢</span> Card · Notes</div>
+    <div class="layer indent-2" data-for="work-data"><span class="icon">▢</span> Card · Ask the data</div>
+    <div class="layer indent-2" data-for="contact"><span class="icon">▢</span> Contact</div>
+    <div class="layer indent-1"><span class="icon">▦</span> Loose bits</div>
+    <div class="layer indent-2" data-for="sticky-cv"><span class="icon">◪</span> Sticky · CV</div>
+    <div class="layer indent-2" data-for="sticky-idea"><span class="icon">◪</span> Sticky · the idea</div>
+    <div class="layer indent-2" data-for="sticky-humility"><span class="icon">◪</span> Sticky · humility</div>
+    <div class="layer indent-2 muted" data-for="artboard-v1"><span class="icon">#</span> v1 — 2019 <span class="lock">🔒</span></div>
+  </nav>
+
+  <main class="canvas" id="canvas">
+    <div class="canvas-inner" id="canvasInner">
+
+      <svg class="wires" viewBox="0 0 1560 1180" aria-hidden="true">
+        <defs>
+          <marker id="head" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M1 1 L8 4.5 L1 8" fill="none" stroke="#c9a13e" stroke-width="1.6" stroke-linecap="round"/>
+          </marker>
+        </defs>
+        <path d="M240 560 C 280 610, 330 640, 388 600" fill="none" stroke="#c9a13e" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#head)" transform="translate(0,-40)"/>
+      </svg>
+
+      <p class="artboard-label" id="label-v2"><span class="dot"></span> v2 — draft · Jack is editing</p>
+      <section class="artboard" id="artboard-v2">
+        <div class="doc">
+          <p class="kicker" data-node="Kicker">Full-stack developer</p>
+          <h1 data-node="Heading" id="heading">Jack<br>Heriz-Smith</h1>
+          <p class="intro" data-node="Intro" id="intro">I design and build software end-to-end — web apps, data tools and AI services that people actually enjoy using. Currently building at Sourcerie.</p>
+          <div class="actions">
+            <span class="btn" data-node="Button · Contact" id="btn-contact">Get in touch</span>
+            <span class="btn ghost" data-node="Button · CV">Download CV</span>
+          </div>
+          <h2 data-node="Heading · Work">Recent work</h2>
+          <div class="work">
+            <div class="item" data-node="Card · Sourcerie" id="work-sourcerie">
+              <span class="name">Sourcerie</span>
+              <span class="desc">Product engineering across a B2B platform — React, Node, Postgres, and all the glue in between.</span>
+            </div>
+            <div class="item" data-node="Card · Notes" id="work-notes">
+              <span class="name">Notes</span>
+              <span class="desc">An AI note-generation service on Cloudflare Workers: queues, KV, R2 and a deliberately tiny UI.</span>
+            </div>
+            <div class="item" data-node="Card · Ask the data" id="work-data">
+              <span class="name">Ask the data</span>
+              <span class="desc">Natural-language analytics — plain-English questions compiled to SQL over Postgres.</span>
+            </div>
+          </div>
+          <div class="contact" id="contact" data-node="Contact">
+            <span>Let's build something good.</span>
+            <span class="links"><u>GitHub</u><u>LinkedIn</u><u>Email</u></span>
+          </div>
+        </div>
+      </section>
+
+      <p class="artboard-label" id="label-v1">v1 — 2019 · locked</p>
+      <section class="artboard" id="artboard-v1" data-node="Frame · v1 (2019)">
+        <h1>I'm Jack, a full stack developer</h1>
+        <p>I solve problems and build things that bring joy to users. Have a look around and get in touch!</p>
+        <div class="chips"><i>HTML</i><i>CSS</i><i>Sass</i><i>JavaScript</i><i>React</i><i>Jest</i><i>Node.js</i><i>PostgreSQL</i></div>
+        <div class="blocks"><div></div><div></div><div></div><div></div></div>
+      </section>
+
+      <div class="sticky hand" id="sticky-cv" data-node="Sticky · CV">TODO: update CV<br>(it still says 2020 lol) ✏️</div>
+      <div class="sticky hand" id="sticky-idea" data-node="Sticky · the idea">idea: the site IS the editor ✓<br><br>select · drag · rotate ·<br>break it · publish it</div>
+      <div class="sticky hand" id="sticky-humility" data-node="Sticky · humility">keep v1 for humility</div>
+      <div class="arrow-label hand">start here!!</div>
+
+      <div class="sel-box" id="selBox" aria-hidden="true">
+        <div class="sel-frame"></div>
+        <div class="rotate"></div>
+        <div class="handle h-nw"></div><div class="handle h-n"></div><div class="handle h-ne"></div>
+        <div class="handle h-e"></div><div class="handle h-se"></div><div class="handle h-s"></div>
+        <div class="handle h-sw"></div><div class="handle h-w"></div>
+        <div class="dims" id="dims"></div>
+      </div>
+
+      <div class="jack-sel" id="jackSel" aria-hidden="true">
+        <div class="frame"></div><div class="tag">Jack</div>
+      </div>
+
+      <div class="jack-cursor" id="jackCursor" aria-hidden="true">
+        <svg viewBox="0 0 16 16"><path d="M2 1l4 13 2.5-5L14 7z" fill="#12b76a" stroke="#fff" stroke-width="1"/></svg>
+        <div class="tag">Jack</div>
+        <div class="jack-bubble" id="jackBubble"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="panel right" aria-label="Inspector">
+    <div class="insp-section">
+      <h3 id="selName">Heading</h3>
+      <div class="row">
+        <div class="field"><label>X</label><span class="val" id="fX">0</span></div>
+        <div class="field"><label>Y</label><span class="val" id="fY">0</span></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>W</label><span class="val" id="fW">0</span></div>
+        <div class="field"><label>H</label><span class="val" id="fH">0</span></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>⟲</label><span class="val" id="fR">0°</span></div>
+        <div class="field"><label>◜</label><span class="val">0</span></div>
+      </div>
+    </div>
+    <div class="insp-section">
+      <h3>Fill</h3>
+      <div class="row"><div class="field"><span class="swatch" id="fillSwatch" style="background:#17191c"></span><span class="val" id="fillHex">17191C</span><span style="margin-left:auto;color:var(--ink-2)">100%</span></div></div>
+    </div>
+    <div class="insp-section">
+      <h3>Typography</h3>
+      <div class="kv"><span>Font</span><b id="tFont">New York</b></div>
+      <div class="kv"><span>Weight / size</span><b id="tSize">Semibold · 54</b></div>
+      <div class="kv"><span>Line height</span><b>104%</b></div>
+    </div>
+    <div class="insp-section">
+      <h3>Collaboration</h3>
+      <div class="kv"><span style="color:var(--jack);font-weight:600">● Jack</span><b id="jackStatus">pottering about</b></div>
+      <div class="kv"><span style="color:var(--select);font-weight:600">● You</span><b>have the good cursor</b></div>
+    </div>
+    <div class="insp-section">
+      <h3>Export <span>＋</span></h3>
+      <div class="kv"><span>Preset</span><b>PNG · 2×</b></div>
+    </div>
+  </aside>
+
+</div>
+
+<p class="hint">Select things — <b>Jack will come and have a look</b> · he tidies his stickies when he thinks you're not watching</p>
+
+<script>
+  const canvasInner = document.getElementById('canvasInner');
+  const canvas = document.getElementById('canvas');
+  const selBox = document.getElementById('selBox');
+  const dims = document.getElementById('dims');
+  let current = null;
+
+  const innerPos = el => {
+    const r = el.getBoundingClientRect(), c = canvasInner.getBoundingClientRect();
+    return { x: r.left - c.left, y: r.top - c.top, w: r.width, h: r.height };
+  };
+  const rotationOf = el => {
+    const m = getComputedStyle(el).transform;
+    if (!m || m === 'none' || !m.startsWith('matrix')) return 0;
+    const v = m.slice(7,-1).split(',').map(Number);
+    return Math.round(Math.atan2(v[1], v[0]) * 180 / Math.PI * 10) / 10;
+  };
+
+  function select(el){
+    current = el;
+    const p = innerPos(el);
+    selBox.style.left = p.x + 'px'; selBox.style.top = p.y + 'px';
+    selBox.style.width = p.w + 'px'; selBox.style.height = p.h + 'px';
+    selBox.classList.add('on');
+    dims.textContent = Math.round(p.w) + ' × ' + Math.round(p.h);
+    document.getElementById('selName').textContent = el.dataset.node;
+    const a = innerPos(document.getElementById('artboard-v2'));
+    document.getElementById('fX').textContent = Math.round(p.x - a.x);
+    document.getElementById('fY').textContent = Math.round(p.y - a.y);
+    document.getElementById('fW').textContent = Math.round(p.w);
+    document.getElementById('fH').textContent = Math.round(p.h);
+    document.getElementById('fR').textContent = rotationOf(el) + '°';
+    const cs = getComputedStyle(el);
+    const bg = cs.backgroundColor, col = cs.color;
+    const toHex = c => {
+      const m = c.match(/\d+/g); if(!m) return '17191C';
+      return m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('').toUpperCase();
+    };
+    const useBg = bg && bg !== 'rgba(0, 0, 0, 0)';
+    document.getElementById('fillSwatch').style.background = useBg ? bg : col;
+    document.getElementById('fillHex').textContent = toHex(useBg ? bg : col);
+    document.getElementById('tFont').textContent = cs.fontFamily.includes('serif') && !cs.fontFamily.includes('sans') ? 'New York' : (cs.fontFamily.includes('Chalkboard') ? 'Chalkboard SE' : 'SF Pro');
+    document.getElementById('tSize').textContent = (parseInt(cs.fontWeight) >= 600 ? 'Semibold' : 'Regular') + ' · ' + Math.round(parseFloat(cs.fontSize));
+    document.querySelectorAll('.layer').forEach(l=>{
+      l.classList.toggle('sel', l.dataset.for === el.id && el.id !== '');
+    });
+    jackNotice(el);
+  }
+
+  document.querySelectorAll('[data-node]').forEach(el=>{
+    el.addEventListener('click', e=>{ e.stopPropagation(); select(el); });
+  });
+  document.querySelectorAll('.layer[data-for]').forEach(l=>{
+    l.addEventListener('click', ()=>{
+      const t = document.getElementById(l.dataset.for);
+      if (t && t.dataset.node) select(t);
+    });
+  });
+  canvas.addEventListener('click', ()=>{ selBox.classList.remove('on'); current=null; });
+  addEventListener('keydown', e=>{ if(e.key==='Escape') selBox.classList.remove('on'); });
+  const resync = ()=>{ if(current) select(current); };
+  addEventListener('resize', resync);
+
+  /* ── Jack, the resident collaborator ── */
+  const jack = document.getElementById('jackCursor');
+  const bubble = document.getElementById('jackBubble');
+  const jackSel = document.getElementById('jackSel');
+  const jackStatus = document.getElementById('jackStatus');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let jx = 900, jy = 620, tx = jx, ty = jy;
+  let dwellUntil = 0, action = null, queue = [];
+  jack.style.transform = `translate(${jx}px,${jy}px)`;
+
+  const say = (text, ms=2600) => {
+    bubble.textContent = text; bubble.classList.add('on');
+    setTimeout(()=>bubble.classList.remove('on'), ms);
+  };
+  const jackSelect = el => {
+    const p = innerPos(el);
+    jackSel.style.left = p.x + 'px'; jackSel.style.top = p.y + 'px';
+    jackSel.style.width = p.w + 'px'; jackSel.style.height = p.h + 'px';
+    jackSel.classList.add('on');
+    document.querySelectorAll('.layer').forEach(l=>
+      l.classList.toggle('jacksel', l.dataset.for === el.id && el.id !== ''));
+    setTimeout(()=>{ jackSel.classList.remove('on');
+      document.querySelectorAll('.layer').forEach(l=>l.classList.remove('jacksel'));
+    }, 2400);
+  };
+  const targetNear = el => {
+    const p = innerPos(el);
+    tx = p.x + p.w * (0.3 + Math.random()*0.5);
+    ty = p.y + p.h * (0.3 + Math.random()*0.5);
+  };
+
+  const wanderPlan = [
+    { id:'heading', status:'admiring the serif', bubble:null, select:true },
+    { id:'sticky-cv', status:'avoiding the CV', bubble:'I know, I know.', select:true },
+    { id:'work-notes', status:'polishing Notes', bubble:null, select:true },
+    { id:'sticky-idea', status:'quite pleased with this', bubble:'still a good idea', select:true },
+    { id:'artboard-v1', status:'visiting 2019', bubble:'we don’t talk about v1', select:true },
+    { id:'btn-contact', status:'hovering over Publish', bubble:null, select:true },
+    { id:'intro', status:'rewording the intro', bubble:'“actually enjoy using”… keep', select:true },
+    { id:'sticky-humility', status:'straightening a sticky', bubble:'straighter ✓', select:true, tidy:true },
+  ];
+  let planIdx = 0;
+
+  const reactions = [
+    'ooh, good choice',
+    'careful — that took ages',
+    'you’ll be able to drag that in the real thing',
+    'inspector’s on the right →',
+    'go on, select the stickies too',
+  ];
+  let reactIdx = 0, lastReact = 0;
+  function jackNotice(el){
+    if (reduced) return;
+    const now = performance.now();
+    if (now - lastReact < 9000 || reactIdx >= reactions.length) return;
+    lastReact = now;
+    const line = reactions[reactIdx++];
+    queue.push({ el, status:'coming to look', bubble:line, select:false });
+  }
+
+  function nextAction(){
+    if (queue.length){ action = queue.shift(); }
+    else { action = wanderPlan[planIdx % wanderPlan.length]; planIdx++; }
+    const el = action.el || document.getElementById(action.id);
+    if (!el) { action = null; return; }
+    action.target = el;
+    targetNear(el);
+    jackStatus.textContent = action.status;
+  }
+
+  function arrive(){
+    const a = action; action = null;
+    if (!a) return;
+    if (a.select) jackSelect(a.target);
+    if (a.bubble) say(a.bubble);
+    if (a.tidy){
+      a.target.style.transition = 'transform .8s ease';
+      a.target.style.transform = 'rotate(0.5deg)';
+      setTimeout(resync, 850);
+    }
+    dwellUntil = performance.now() + 2200 + Math.random()*2800;
+  }
+
+  if (!reduced){
+    (function tick(now){
+      requestAnimationFrame(tick);
+      if (!action){
+        if (now < dwellUntil) return;
+        nextAction();
+        return;
+      }
+      const dx = tx - jx, dy = ty - jy;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 3){ arrive(); return; }
+      const step = Math.min(dist, 1.6 + dist * 0.028);
+      jx += dx / dist * step; jy += dy / dist * step;
+      jack.style.transform = `translate(${jx}px,${jy}px)`;
+    })(performance.now());
+    setTimeout(()=>say('hi — don’t mind me'), 1800);
+  } else {
+    jackStatus.textContent = 'here, quietly';
+  }
+
+  canvas.scrollLeft = 90; canvas.scrollTop = 30;
+  canvas.addEventListener('scroll', resync, {passive:true});
+  select(document.getElementById('heading'));
+</script>
+</body>
+</html>

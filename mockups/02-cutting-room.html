@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 · Cutting Room — jackherizsmith.com concept</title>
+<style>
+  :root{
+    --bg:#121316; --panel:#1a1c20; --panel-2:#202329; --line:#2c2f36;
+    --ink:#c9ccd2; --muted:#7c8087; --amber:#f2a33c; --cool:#6fb7d8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:12px;color:var(--ink);background:var(--bg);
+    display:grid;grid-template-rows:46px 1fr 218px;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .cond{font-family:"Futura-CondensedExtraBold","Futura Condensed ExtraBold","Arial Narrow Bold","Arial Narrow",sans-serif}
+
+  /* ── Toolbar ─────────────────────────── */
+  .toolbar{
+    background:var(--panel);border-bottom:1px solid #000;
+    display:flex;align-items:center;gap:10px;padding:0 14px;
+  }
+  .toolbar .grow{flex:1}
+  .file{font-weight:600;color:var(--ink)}
+  .file .ext{color:var(--muted);font-weight:400}
+  .transport{display:flex;gap:4px}
+  .tbtn{
+    width:30px;height:26px;display:grid;place-items:center;border-radius:5px;
+    color:var(--muted);cursor:pointer;font-size:11px;
+  }
+  .tbtn:hover{background:var(--panel-2);color:var(--ink)}
+  .tbtn.play{color:var(--amber)}
+  .tabs{display:flex;gap:2px;background:#0d0e10;padding:3px;border-radius:7px}
+  .tab{padding:4px 12px;border-radius:5px;color:var(--muted);cursor:pointer}
+  .tab.on{background:var(--panel-2);color:var(--ink)}
+  .publish{
+    background:var(--amber);color:#1a1200;border:0;font:inherit;font-weight:700;
+    padding:6px 14px;border-radius:6px;cursor:pointer;
+  }
+  .publish:hover{filter:brightness(1.08)}
+
+  /* ── Main: monitor + inspector ───────── */
+  .main{display:grid;grid-template-columns:1fr 300px;min-height:0}
+  .stage-wrap{display:grid;grid-template-rows:1fr auto;min-width:0;background:#0b0c0e;padding:22px 26px 10px}
+  .stage{
+    position:relative;margin:auto;aspect-ratio:16/9;max-height:100%;max-width:100%;
+    width:min(100%, 78vh * 16 / 9);
+    background:#0d0e10;border:1px solid #26292f;box-shadow:0 0 0 1px #000, 0 18px 60px rgba(0,0,0,.55);
+    overflow:hidden;
+  }
+  .safe{position:absolute;inset:5%;border:1px solid rgba(255,255,255,.09);pointer-events:none}
+  .safe.inner{inset:10%;border-color:rgba(255,255,255,.05)}
+
+  .doc{position:absolute;inset:0;padding:6.5% 8%;display:flex;flex-direction:column}
+  .doc .kicker{color:var(--amber);letter-spacing:.28em;text-transform:uppercase;font-size:clamp(8px,1.1vw,12px);margin-bottom:1.2%}
+  .doc h1{
+    color:#f4f5f7;font-size:clamp(30px,5.4vw,76px);line-height:.96;letter-spacing:.015em;
+    text-transform:uppercase;margin-bottom:2%;
+  }
+  .doc .rule{width:64px;height:3px;background:var(--amber);margin-bottom:3.5%}
+  .lower-thirds{display:flex;flex-direction:column;gap:2.2%;flex:1;justify-content:center;max-width:74%}
+  .lt{
+    display:flex;align-items:baseline;gap:14px;padding:1.6% 2.2%;
+    background:linear-gradient(90deg,rgba(255,255,255,.055),rgba(255,255,255,0) 82%);
+    border-left:3px solid var(--amber);
+  }
+  .lt .name{color:#f4f5f7;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(11px,1.5vw,19px);white-space:nowrap}
+  .lt .desc{color:#9ba0a8;font-size:clamp(8px,1vw,13px);line-height:1.4}
+  .doc .credits{
+    display:flex;gap:2.6%;align-items:center;color:#8a8f97;
+    font-size:clamp(8px,1vw,12px);letter-spacing:.12em;text-transform:uppercase;
+  }
+  .doc .credits .cta{color:#1a1200;background:var(--amber);padding:.5% 1.6%;letter-spacing:.1em;font-weight:700;cursor:pointer}
+  .doc .credits span:not(.cta){cursor:pointer}
+  .doc .credits span:not(.cta):hover{color:#d7dbe0}
+
+  .stage-info{
+    display:flex;justify-content:space-between;color:var(--muted);
+    padding:10px 4px 0;font-variant-numeric:tabular-nums;
+  }
+  .stage-info b{color:var(--ink);font-weight:600}
+
+  /* ── Inspector ───────────────────────── */
+  .inspector{background:var(--panel);border-left:1px solid #000;overflow-y:auto;padding-bottom:20px}
+  .inspector h3{
+    font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+    padding:14px 14px 8px;
+  }
+  .clipname{padding:0 14px 4px;font-weight:700;color:#f4f5f7;font-size:13px}
+  .kv{display:flex;justify-content:space-between;padding:4px 14px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .kv b{color:var(--ink);font-weight:600}
+  .divider{border-top:1px solid var(--line);margin:12px 0 0}
+
+  .histo{display:flex;align-items:flex-end;gap:2px;height:56px;margin:6px 14px;padding:6px;background:#0d0e10;border-radius:4px}
+  .histo i{flex:1;background:linear-gradient(180deg,#e8b25c,#8a5f22);border-radius:1px}
+
+  .wheels{display:flex;justify-content:space-between;padding:8px 14px}
+  .wheel{text-align:center;color:var(--muted);font-size:10px}
+  .wheel .disc{
+    width:62px;height:62px;border-radius:50%;margin-bottom:6px;position:relative;
+    background:conic-gradient(#e46a6a,#e4c76a,#7fe46a,#6ae4d3,#6a8de4,#c76ae4,#e46a6a);
+    filter:saturate(.55) brightness(.85);
+  }
+  .wheel .disc::after{
+    content:"";position:absolute;inset:4px;border-radius:50%;
+    background:radial-gradient(circle,#1a1c20 30%,transparent 72%);
+  }
+  .wheel .disc i{
+    position:absolute;width:7px;height:7px;border-radius:50%;background:#fff;
+    top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 1.5px #000;
+  }
+  .wheel.gain .disc i{top:44%;left:56%}
+
+  .slider{padding:5px 14px;display:grid;grid-template-columns:70px 1fr 34px;gap:10px;align-items:center;color:var(--muted)}
+  .slider .track{height:3px;background:#33363d;border-radius:2px;position:relative}
+  .slider .track i{position:absolute;left:0;top:0;bottom:0;background:var(--amber);border-radius:2px}
+  .slider .track b{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:#e8eaee;transform:translate(-50%,-50%)}
+  .slider .num{text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  /* ── Timeline ────────────────────────── */
+  .timeline{
+    background:var(--panel-2);border-top:1px solid #000;
+    display:grid;grid-template-columns:170px 1fr;min-height:0;
+  }
+  .tl-head{border-right:1px solid var(--line);display:flex;flex-direction:column}
+  .tc{
+    font-size:21px;color:var(--amber);font-variant-numeric:tabular-nums;letter-spacing:.04em;
+    padding:12px 14px 8px;font-weight:600;
+  }
+  .track-label{
+    flex:1;display:flex;align-items:center;gap:8px;padding:0 14px;
+    border-top:1px solid var(--line);color:var(--muted);
+  }
+  .track-label b{color:var(--ink);font-weight:600;width:22px}
+  .track-label .icons{margin-left:auto;letter-spacing:3px;font-size:10px;opacity:.6}
+
+  .tl-body{position:relative;overflow:hidden}
+  .ruler{
+    height:41px;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;
+    color:var(--muted);font-variant-numeric:tabular-nums;position:relative;
+  }
+  .ruler span{flex:1;border-left:1px solid #3a3e46;padding:0 0 6px 6px;font-size:10px}
+  .tracks{position:absolute;inset:41px 0 0 0;display:flex;flex-direction:column}
+  .track{flex:1;border-top:1px solid var(--line);position:relative}
+  .clip{
+    position:absolute;top:7px;bottom:7px;border-radius:4px;padding:5px 9px;
+    font-size:11px;font-weight:600;color:#0e0f12;cursor:pointer;overflow:hidden;white-space:nowrap;
+    background:linear-gradient(180deg,#7fa8bd,#5f8ba1);box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
+  }
+  .clip small{display:block;font-weight:400;opacity:.75;font-size:9px}
+  .clip:hover{filter:brightness(1.1)}
+  .clip.amber{background:linear-gradient(180deg,#eeb268,#cd8f3d)}
+  .clip.now::after{
+    content:"NOW";position:absolute;right:7px;top:6px;font-size:8px;letter-spacing:.12em;
+    color:rgba(20,12,0,.7);
+  }
+  .wave{
+    position:absolute;top:12px;bottom:12px;left:1.5%;right:2%;border-radius:3px;opacity:.85;
+    background:repeating-linear-gradient(90deg,#4b7d64 0 2px,#2c4a3b 2px 4px);
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 28%,#000 72%,transparent 100%);
+            mask-image:linear-gradient(180deg,transparent 0,#000 28%,#000 72%,transparent 100%);
+  }
+  .wave-label{position:absolute;left:1.8%;top:3px;font-size:9px;color:#7ea892;letter-spacing:.08em}
+
+  .playhead{
+    position:absolute;top:0;bottom:0;left:86%;width:1px;background:var(--amber);z-index:5;pointer-events:none;
+  }
+  .playhead::before{
+    content:"";position:absolute;top:0;left:-6px;border:6px solid transparent;border-top:7px solid var(--amber);
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .playhead{animation:crawl 90s linear infinite}
+    @keyframes crawl{from{left:3%}to{left:97%}}
+  }
+
+  /* selection brackets */
+  [data-node]{cursor:default}
+  .doc [data-node]:hover{outline:1px solid rgba(242,163,60,.5);outline-offset:3px}
+  .brackets{position:fixed;pointer-events:none;z-index:50;display:none}
+  .brackets.on{display:block}
+  .brackets i{position:absolute;width:14px;height:14px;border:2px solid var(--amber)}
+  .b-nw{top:-3px;left:-3px;border-right:0!important;border-bottom:0!important}
+  .b-ne{top:-3px;right:-3px;border-left:0!important;border-bottom:0!important}
+  .b-se{bottom:-3px;right:-3px;border-left:0!important;border-top:0!important}
+  .b-sw{bottom:-3px;left:-3px;border-right:0!important;border-top:0!important}
+  .brackets .tag{
+    position:absolute;bottom:calc(100% + 7px);left:-3px;background:var(--amber);color:#1a1200;
+    font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;white-space:nowrap;
+  }
+
+  .hint{
+    position:fixed;bottom:230px;left:50%;transform:translateX(-50%);z-index:40;
+    background:#000;color:#c9ccd2;font-size:11px;padding:7px 12px;border-radius:8px;opacity:.9;
+  }
+  .hint b{color:var(--amber)}
+
+  @media (max-width:900px){
+    body{grid-template-rows:46px 1fr;overflow:auto}
+    .timeline,.inspector,.hint{display:none}
+    .main{grid-template-columns:1fr}
+    .stage-wrap{padding:12px}
+  }
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <span class="file">jackherizsmith.com <span class="ext">— cut 02</span></span>
+  <div class="grow"></div>
+  <div class="transport">
+    <div class="tbtn">⏮</div><div class="tbtn play">▶</div><div class="tbtn">⏭</div>
+  </div>
+  <div class="grow"></div>
+  <div class="tabs">
+    <span class="tab on">Edit</span><span class="tab">Colour</span><span class="tab">Effects</span>
+  </div>
+  <button class="publish">Publish</button>
+</header>
+
+<div class="main">
+  <div class="stage-wrap">
+    <div class="stage">
+      <div class="safe"></div><div class="safe inner"></div>
+      <div class="doc">
+        <p class="kicker" data-node="Title · Kicker">Full-stack developer · Sourcerie</p>
+        <h1 class="cond" data-node="Title · Name" id="firstSel">Jack Heriz-Smith</h1>
+        <div class="rule" data-node="Rule"></div>
+        <div class="lower-thirds">
+          <div class="lt" data-node="Lower third · Sourcerie">
+            <span class="name cond">Sourcerie</span>
+            <span class="desc">Product engineering across a B2B platform — React, Node, Postgres, and all the glue in between.</span>
+          </div>
+          <div class="lt" data-node="Lower third · Notes">
+            <span class="name cond">Notes</span>
+            <span class="desc">AI note generation on Cloudflare Workers — queues, KV, R2 and a deliberately tiny UI.</span>
+          </div>
+          <div class="lt" data-node="Lower third · Ask the data">
+            <span class="name cond">Ask the data</span>
+            <span class="desc">Natural-language analytics — plain-English questions compiled to SQL over Postgres.</span>
+          </div>
+        </div>
+        <div class="credits" data-node="Credits">
+          <span class="cta">Get in touch</span><span>GitHub</span><span>LinkedIn</span><span>CV</span>
+        </div>
+      </div>
+    </div>
+    <div class="stage-info">
+      <span>Programme: <b>jackherizsmith.com</b></span>
+      <span>Fit ▾ · <b>Full quality</b></span>
+    </div>
+  </div>
+
+  <aside class="inspector">
+    <h3>Selected clip</h3>
+    <p class="clipname" id="selName">Title · Name</p>
+    <div class="kv"><span>In</span><b id="selIn">00:00:02:11</b></div>
+    <div class="kv"><span>Out</span><b>—</b></div>
+    <div class="kv"><span>Size</span><b id="selSize">612 × 88</b></div>
+    <div class="divider"></div>
+    <h3>Scopes</h3>
+    <div class="histo" aria-hidden="true">
+      <i style="height:22%"></i><i style="height:38%"></i><i style="height:64%"></i><i style="height:90%"></i>
+      <i style="height:71%"></i><i style="height:52%"></i><i style="height:60%"></i><i style="height:34%"></i>
+      <i style="height:47%"></i><i style="height:76%"></i><i style="height:41%"></i><i style="height:18%"></i>
+    </div>
+    <div class="divider"></div>
+    <h3>Colour wheels</h3>
+    <div class="wheels" aria-hidden="true">
+      <div class="wheel"><div class="disc"><i></i></div>Lift</div>
+      <div class="wheel"><div class="disc"><i></i></div>Gamma</div>
+      <div class="wheel gain"><div class="disc"><i></i></div>Gain</div>
+    </div>
+    <div class="divider"></div>
+    <h3>Adjust</h3>
+    <div class="slider"><span>Exposure</span><div class="track"><i style="width:58%"></i><b style="left:58%"></b></div><span class="num">+0.4</span></div>
+    <div class="slider"><span>Contrast</span><div class="track"><i style="width:66%"></i><b style="left:66%"></b></div><span class="num">+12</span></div>
+    <div class="slider"><span>Saturation</span><div class="track"><i style="width:50%"></i><b style="left:50%"></b></div><span class="num">100</span></div>
+    <div class="slider"><span>Warmth</span><div class="track"><i style="width:61%"></i><b style="left:61%"></b></div><span class="num">+8</span></div>
+  </aside>
+</div>
+
+<footer class="timeline">
+  <div class="tl-head">
+    <div class="tc" id="timecode">00:00:12:07</div>
+    <div class="track-label"><b>V2</b> Projects <span class="icons">👁 🔒</span></div>
+    <div class="track-label"><b>V1</b> Roles <span class="icons">👁 🔒</span></div>
+    <div class="track-label"><b>A1</b> Learning <span class="icons">🔊</span></div>
+  </div>
+  <div class="tl-body">
+    <div class="ruler">
+      <span>2019</span><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span>
+    </div>
+    <div class="tracks">
+      <div class="track">
+        <div class="clip" style="left:11%;width:14%" data-node="Clip · Criminal Appeals Fund">Criminal Appeals Fund<small>pro bono build</small></div>
+        <div class="clip" style="left:64%;width:13%" data-node="Clip · Notes">Notes<small>Cloudflare Workers</small></div>
+        <div class="clip" style="left:79%;width:16%" data-node="Clip · Ask the data">Ask the data<small>NL → SQL</small></div>
+      </div>
+      <div class="track">
+        <div class="clip" style="left:2%;width:22%" data-node="Clip · Freelance & bootcamp">Freelance & bootcamp<small>learning in public</small></div>
+        <div class="clip amber now" style="left:26%;width:69%" data-node="Clip · Sourcerie">Sourcerie — product engineer<small>full-stack, end to end</small></div>
+      </div>
+      <div class="track">
+        <span class="wave-label">LEARNING — ALWAYS ON</span>
+        <div class="wave"></div>
+      </div>
+      <div class="playhead"></div>
+    </div>
+  </div>
+</footer>
+
+<div class="brackets" id="brackets" aria-hidden="true">
+  <i class="b-nw"></i><i class="b-ne"></i><i class="b-se"></i><i class="b-sw"></i>
+  <div class="tag" id="bTag"></div>
+</div>
+
+<p class="hint">Click a title, a lower third — or a clip in the timeline. <b>Your career is the edit.</b></p>
+
+<script>
+  const brackets = document.getElementById('brackets');
+  const bTag = document.getElementById('bTag');
+  const selName = document.getElementById('selName');
+  const selSize = document.getElementById('selSize');
+  const selIn = document.getElementById('selIn');
+  let current = null;
+
+  function select(el){
+    current = el;
+    const r = el.getBoundingClientRect();
+    brackets.style.left = r.left + 'px';
+    brackets.style.top = r.top + 'px';
+    brackets.style.width = r.width + 'px';
+    brackets.style.height = r.height + 'px';
+    brackets.classList.add('on');
+    bTag.textContent = el.dataset.node;
+    selName.textContent = el.dataset.node;
+    selSize.textContent = Math.round(r.width) + ' × ' + Math.round(r.height);
+    selIn.textContent = '00:00:' + String(Math.round(r.top) % 60).padStart(2,'0') + ':' + String(Math.round(r.left) % 25).padStart(2,'0');
+  }
+
+  document.querySelectorAll('[data-node]').forEach(el=>{
+    el.addEventListener('click', e=>{ e.stopPropagation(); select(el); });
+  });
+  document.body.addEventListener('click', ()=>{ brackets.classList.remove('on'); current=null; });
+  addEventListener('keydown', e=>{ if(e.key==='Escape') brackets.classList.remove('on'); });
+  addEventListener('resize', ()=>{ if(current) select(current); });
+
+  const tc = document.getElementById('timecode');
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    let f = 307;
+    setInterval(()=>{
+      f = (f + 1) % (60*60*25);
+      const s = Math.floor(f/25), fr = f%25;
+      tc.textContent = '00:' + String(Math.floor(s/60)).padStart(2,'0') + ':' +
+                       String(s%60).padStart(2,'0') + ':' + String(fr).padStart(2,'0');
+    }, 40);
+  }
+
+  select(document.getElementById('firstSel'));
+</script>
+</body>
+</html>
