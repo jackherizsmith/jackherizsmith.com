@@ -5,3 +5,8 @@ compatibility_date = "2026-07-01"
 [[kv_namespaces]]
 binding = "COMMENTS"
 id = "fb3dd7c7946d47dfb90d9a0d74e52f9f"
+
+# The EMAIL (send_email) binding is NOT set here: Pages rejects send_email in
+# wrangler.toml. Once jackherizsmith.com is onboarded to Email Sending, add an
+# EMAIL binding via the Pages dashboard (Settings > Functions > Bindings). The
+# comment Function checks `if (env.EMAIL)` and falls back to KV-only until then.

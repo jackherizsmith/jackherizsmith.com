@@ -216,11 +216,14 @@ function initHistory(): void {
       </div>`).join('')}
     <p class="ver-foot">Restore points unavailable: this file only moves forward.</p>`;
 
+  const testsView = document.getElementById('testsView');
+  const testsBtn = document.getElementById('toolTests');
   btn.addEventListener('click', () => {
     const showing = !historyView.hidden;
     historyView.hidden = showing;
     inspectorView.hidden = !showing;
     btn.classList.toggle('on', !showing);
+    if (!showing && testsView) { testsView.hidden = true; testsBtn?.classList.remove('on'); }
   });
 }
 

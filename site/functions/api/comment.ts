@@ -46,7 +46,7 @@ export const onRequestPost = async ({ request, env }: Ctx): Promise<Response> =>
     try {
       await env.EMAIL.send({
         to: 'jackherizsmith@gmail.com',
-        from: { email: 'comments@jackherizsmith.com', name: 'jackherizsmith.com' },
+        from: { email: 'hello@jackherizsmith.com', name: 'jackherizsmith.com' },
         subject: `New comment on jackherizsmith.com${name ? ` from ${name}` : ''}`,
         text: `${message}\n\nFrom: ${name || 'anonymous'}\nAt: ${new Date().toISOString()}`,
       });

@@ -398,3 +398,22 @@ body.interacting iframe{pointer-events:none}
 .ver-org{font-size:11.5px;color:var(--ink-2)}
 .ver-note{font-size:11.5px;color:#5a6067;line-height:1.5;margin-top:3px}
 .ver-foot{padding:10px 12px 16px;color:#9aa0ab;font-size:11px}
+
+/* ── In-editor test runner ───────────────── */
+#testsView[hidden]{display:none}
+#testsView h3 span{font-weight:600;font-size:11px}
+#testSummary.all-pass{color:var(--jack)}
+#testSummary.has-fail{color:var(--guide)}
+.test-note{font-size:11px;color:var(--ink-2);line-height:1.5;padding:0 12px 8px}
+.test-row{display:flex;align-items:baseline;gap:9px;padding:6px 12px;font-size:12px}
+.test-dot{width:9px;height:9px;border-radius:50%;flex:none;position:relative;top:2px;background:#d4d8de}
+.test-row.running .test-dot{background:var(--select);animation:tpulse .7s infinite}
+.test-row.pass .test-dot{background:var(--jack)}
+.test-row.fail .test-dot{background:var(--guide)}
+@keyframes tpulse{50%{opacity:.3}}
+.test-name{flex:1;line-height:1.4}
+.test-row.pending .test-name{color:#aeb3ba}
+.test-row.pass .test-name::after{content:" ✓";color:var(--jack);font-weight:700}
+.test-row.fail .test-name{color:var(--ink)}
+.test-msg{display:block;flex-basis:100%;padding-left:18px;color:var(--guide);font-size:11px;line-height:1.4}
+.test-msg:empty{display:none}
