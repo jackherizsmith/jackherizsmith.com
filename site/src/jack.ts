@@ -8,20 +8,73 @@ interface PlanStep {
   bubble: string | null;
   flash: boolean;
   tidy?: boolean;
+  edit?: boolean;
 }
 interface Action extends PlanStep { el: HTMLElement }
 
 const PLAN: PlanStep[] = [
   { id: 'heading', status: 'admiring the serif', bubble: null, flash: true },
-  { id: 'sticky-cv', status: 'avoiding the CV', bubble: 'I know, I know.', flash: true },
+  { id: 'kicker', status: 'tweaking the tagline', bubble: null, flash: true, edit: true },
+  { id: 'sticky-cv', status: 'avoiding the CV', bubble: 'I know, I know.', flash: true, edit: true },
   { id: 'work-notes', status: 'polishing Notes', bubble: null, flash: true },
+  { id: 'intro', status: 'rewording the intro', bubble: 'nearly there…', flash: true, edit: true },
   { id: 'work-data', status: 'testing the Data demo', bubble: 'ship it soon', flash: true },
-  { id: 'sticky-idea', status: 'quite pleased with this', bubble: 'still a good idea', flash: true },
+  { id: 'sticky-idea', status: 'fiddling with a sticky', bubble: null, flash: true, edit: true },
   { id: 'artboard-v1', status: 'visiting 2019', bubble: 'we don’t talk about v1', flash: true },
+  { id: 'signoff', status: 'redrafting the sign-off', bubble: null, flash: true, edit: true },
   { id: 'btn-contact', status: 'hovering over the button', bubble: null, flash: true },
-  { id: 'intro', status: 'rewording the intro', bubble: '“actually enjoy using”… keep', flash: true },
+  { id: 'arrow-label', status: 'leaving you a note', bubble: null, flash: true, edit: true },
+  { id: 'availability', status: 'refining what he’s after', bubble: null, flash: true, edit: true },
   { id: 'sticky-humility', status: 'straightening a sticky', bubble: 'straighter ✓', flash: true, tidy: true },
 ];
+
+// A pool of on-brand rewrites per line. Jack picks one he isn't already
+// showing, so across a visit the copy keeps shifting without obvious repeats.
+// Applied straight to the DOM (never the store): pure theatre, no persistence.
+const EDITS: Record<string, string[]> = {
+  kicker: [
+    'Product engineer · end to end',
+    'Full-stack, in the honest sense',
+    'Builds the whole thing',
+    'Product engineer · schema to shadows',
+    'Ships the whole stack',
+  ],
+  intro: [
+    'I build products end to end: the schema, the service, the interface, and increasingly the AI in between. At Sourcerie I lead product engineering for a customer insights platform, and build the internal AI tools that keep a small team fast. This site is an editor: select things, move them about, make it yours.',
+    'I build products end to end: schema, service, interface, and increasingly the AI in between. At Sourcerie I lead product engineering on a customer insights platform, and I build the internal AI tools that keep a small team quick. This site is also an editor, so select things, move them about, make it yours.',
+    'From the database to the details, I build the whole product. At Sourcerie I lead product engineering for a customer insights platform and build the internal AI tools that keep a small team moving fast. This page is a live editor, by the way: grab anything, move it, make it yours.',
+  ],
+  signoff: [
+    'Let’s build something good.',
+    'Let’s make something people enjoy.',
+    'Let’s build something worth keeping.',
+    'Got a problem worth solving?',
+    'Say hello. I don’t bite.',
+  ],
+  'sticky-cv': [
+    'TODO: update CV\n(it still says 2020 lol) ✏️',
+    'note to self:\nthe CV can wait,\nthe site says more anyway',
+    'who reads CVs\nin 2026 anyway?',
+    'CV: pending.\nvibes: immaculate.',
+  ],
+  'sticky-idea': [
+    'idea: the site IS the editor ✓\n\nselect · drag · rotate ·\nbreak it · publish it',
+    'idea: the site IS the editor ✓\n\nyes, really. try it.',
+    'the gimmick:\nyou’re in my design\nfile right now',
+    'note: keep the second\ncursor. people like Jack.',
+  ],
+  'arrow-label': [
+    'start here!!',
+    'psst, click things',
+    'drag me somewhere',
+    'yes, you can edit this',
+  ],
+  availability: [
+    'Senior and lead product engineering roles, fractional or interim product leadership, and the occasional freelance build. The fastest routes are a comment on this file (the ＋ pin) or LinkedIn.',
+    'Open to senior and lead product engineering roles, fractional or interim product leadership, and the odd freelance build. Fastest ways to reach me: a comment on this file, or LinkedIn.',
+    'Lead and senior product engineering, fractional or interim product leadership, and select freelance builds. Leave a comment on this file (the ＋ pin), or find me on LinkedIn.',
+  ],
+};
 
 const REACTIONS = [
   'ooh, good choice',
@@ -53,6 +106,8 @@ let tidied = false;
 let reactIdx = 0;
 let lastReact = 0;
 let remixQuip = false;
+let jackEditing = false;
+const shownText = new Map<string, string>();
 const queue: Action[] = [];
 
 function qs(sel: string): HTMLElement {
@@ -91,6 +146,57 @@ function targetNear(el: HTMLElement): void {
   ty = r.y + r.h * (0.3 + Math.random() * 0.5);
 }
 
+function frameOn(el: HTMLElement): void {
+  const r = editor.visualRect(el);
+  flashBox.style.left = `${r.x}px`;
+  flashBox.style.top = `${r.y}px`;
+  flashBox.style.width = `${r.w}px`;
+  flashBox.style.height = `${r.h}px`;
+  flashBox.classList.add('on');
+}
+
+function pickVariant(id: string): string | null {
+  const variants = EDITS[id];
+  if (!variants || !variants.length) return null;
+  const current = shownText.get(id) ?? store.getEl(id)?.innerText ?? '';
+  const pool = variants.filter(v => v !== current);
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Type a fresh variant into the node, caret and all. Bails to the user the
+// moment they grab the same node, and never touches the store.
+function doEdit(el: HTMLElement): void {
+  const id = el.dataset.id ?? '';
+  const next = pickVariant(id);
+  if (!next || editor.selectedEl() === el) {
+    dwellUntil = performance.now() + 1400;
+    return;
+  }
+  jackEditing = true;
+  frameOn(el);
+  markJackLayer(id);
+  const perChar = Math.max(6, Math.min(34, Math.round(900 / next.length)));
+  let i = 0;
+  const finish = (): void => {
+    el.textContent = next;
+    shownText.set(id, next);
+    flashBox.classList.remove('on');
+    markJackLayer(null);
+    jackEditing = false;
+    dwellUntil = performance.now() + 2600 + Math.random() * 2600;
+  };
+  const type = (): void => {
+    if (editor.selectedEl() === el && editor.isBusy()) { finish(); return; }
+    i++;
+    el.textContent = next.slice(0, i) + (i < next.length ? '▍' : '');
+    frameOn(el);
+    if (i < next.length) window.setTimeout(type, perChar);
+    else finish();
+  };
+  window.setTimeout(type, 340);
+}
+
 function isUsable(el: HTMLElement | undefined): el is HTMLElement {
   if (!el) return false;
   const id = el.dataset.id ?? '';
@@ -118,6 +224,11 @@ function arrive(): void {
   const a = action;
   action = null;
   if (!a) return;
+  if (a.edit) {
+    if (a.bubble) say(a.bubble);
+    doEdit(a.el);
+    return;
+  }
   if (a.flash && a.el !== editor.selectedEl()) flash(a.el);
   if (a.bubble) say(a.bubble);
   if (a.tidy && !tidied) {
@@ -150,7 +261,7 @@ function userSelected(el: HTMLElement | null): void {
 
 function tick(now: number): void {
   requestAnimationFrame(tick);
-  if (editor.isBusy()) return;
+  if (editor.isBusy() || jackEditing) return;
   if (!action) {
     if (now < dwellUntil) return;
     nextAction();
