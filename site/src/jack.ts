@@ -164,37 +164,82 @@ function pickVariant(id: string): string | null {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// Type a fresh variant into the node, caret and all. Bails to the user the
-// moment they grab the same node, and never touches the store.
+function commonPrefix(a: string, b: string): number {
+  const n = Math.min(a.length, b.length);
+  let i = 0;
+  while (i < n && a[i] === b[i]) i++;
+  return i;
+}
+
+// Type a fresh variant, caret and all, at a human-ish pace. Sometimes he types
+// a few words of a different variant first, then backspaces and fixes them.
+// Applied straight to the DOM, never the store; bails if the user grabs the node.
 function doEdit(el: HTMLElement): void {
   const id = el.dataset.id ?? '';
-  const next = pickVariant(id);
-  if (!next || editor.selectedEl() === el) {
+  const final = pickVariant(id);
+  if (!final || editor.selectedEl() === el) {
     dwellUntil = performance.now() + 1400;
     return;
   }
   jackEditing = true;
   frameOn(el);
   markJackLayer(id);
-  const perChar = Math.max(6, Math.min(34, Math.round(900 / next.length)));
-  let i = 0;
+
+  // Optional self-correction: a false start that shares a prefix with the
+  // final line, so he can visibly go back and change the wording.
+  const targets: string[] = [];
+  if (Math.random() < 0.5) {
+    const alts = (EDITS[id] ?? [])
+      .filter(v => v !== final)
+      .map(v => ({ v, c: commonPrefix(v, final) }))
+      .filter(o => o.c >= 8 && o.c < final.length - 2);
+    if (alts.length) {
+      const pick = alts[Math.floor(Math.random() * alts.length)];
+      let cut = Math.min(pick.v.length, pick.c + 6 + Math.floor(Math.random() * 12));
+      while (cut < pick.v.length && pick.v[cut] !== ' ') cut++;
+      targets.push(pick.v.slice(0, cut));
+    }
+  }
+  targets.push(final);
+
+  let cur = '';
+  let ti = 0;
+
   const finish = (): void => {
-    el.textContent = next;
-    shownText.set(id, next);
+    el.textContent = final;
+    shownText.set(id, final);
     flashBox.classList.remove('on');
     markJackLayer(null);
     jackEditing = false;
-    dwellUntil = performance.now() + 2600 + Math.random() * 2600;
+    dwellUntil = performance.now() + 2800 + Math.random() * 3000;
   };
-  const type = (): void => {
+
+  const step = (): void => {
     if (editor.selectedEl() === el && editor.isBusy()) { finish(); return; }
-    i++;
-    el.textContent = next.slice(0, i) + (i < next.length ? '▍' : '');
+    const tgt = targets[ti];
+    const common = commonPrefix(cur, tgt);
+    let delay: number;
+    if (cur.length > common) {
+      cur = cur.slice(0, -1);                                  // backspace
+      delay = 32 + Math.random() * 22;
+    } else if (cur.length < tgt.length) {
+      cur = tgt.slice(0, cur.length + 1);                      // type forward
+      const per = Math.max(28, Math.min(62, Math.round(2600 / tgt.length)));
+      delay = per + Math.random() * 45;                        // human jitter
+    } else {
+      ti++;
+      if (ti >= targets.length) { finish(); return; }
+      el.textContent = cur + '▍';
+      frameOn(el);
+      window.setTimeout(step, 520 + Math.random() * 320);      // "hmm, no" beat
+      return;
+    }
+    el.textContent = cur + '▍';
     frameOn(el);
-    if (i < next.length) window.setTimeout(type, perChar);
-    else finish();
+    window.setTimeout(step, delay);
   };
-  window.setTimeout(type, 340);
+
+  window.setTimeout(step, 380);
 }
 
 function isUsable(el: HTMLElement | undefined): el is HTMLElement {
