@@ -325,7 +325,7 @@ body.interacting [data-node]:hover{outline:none}
 .bwin-bar .pop:hover{color:var(--ink)}
 .bwin-body{flex:1;min-height:0;background:#fafbfc;display:grid;place-items:center;overflow:hidden}
 .bwin-body.loaded{display:block}
-.bwin-body iframe{width:200%;height:200%;transform:scale(.5);transform-origin:0 0;border:0;display:block}
+.bwin-body iframe{border:0;display:block;transform-origin:0 0;background:#fff}
 .win-load{
   border:1px solid var(--chrome-line);border-radius:8px;background:#fff;
   font-weight:600;font-size:12px;padding:8px 14px;color:var(--ink-2);

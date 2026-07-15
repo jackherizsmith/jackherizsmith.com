@@ -52,6 +52,21 @@ function initPresent(): void {
 
 /* ── Browser windows (client sites) ──────── */
 
+// Render each client site at a fixed desktop width, then scale it to fit the
+// window. Computing the scale from the live container size (not CSS %) is what
+// keeps it filling the frame after the window is resized on the canvas.
+const DESKTOP_W = 1200;
+
+function fitFrame(body: HTMLElement, iframe: HTMLIFrameElement): void {
+  const w = body.clientWidth;
+  const h = body.clientHeight;
+  if (!w || !h) return;
+  const scale = w / DESKTOP_W;
+  iframe.style.width = `${DESKTOP_W}px`;
+  iframe.style.height = `${Math.ceil(h / scale)}px`;
+  iframe.style.transform = `scale(${scale})`;
+}
+
 function initWindows(): void {
   document.querySelectorAll<HTMLElement>('.bwin-body[data-site]').forEach(body => {
     const btn = body.querySelector<HTMLButtonElement>('.win-load');
@@ -66,6 +81,8 @@ function initWindows(): void {
       body.textContent = '';
       body.classList.add('loaded');
       body.append(iframe);
+      fitFrame(body, iframe);
+      new ResizeObserver(() => fitFrame(body, iframe)).observe(body);
     });
   });
 }
