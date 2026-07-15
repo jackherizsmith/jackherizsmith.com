@@ -145,6 +145,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   background:#fdf3d7;border-radius:4px;padding:2px 6px;vertical-align:2px;white-space:nowrap;
 }
 .work .desc{color:#5a6067;font-size:13.5px;line-height:1.55}
+.disclosure{max-width:520px;font-size:13px;line-height:1.6;font-style:italic;color:#8a9099;margin:20px 0 0}
 .contact{display:flex;align-items:center;gap:16px;border-top:1px solid #eceef1;padding-top:24px;margin-top:44px;font-size:14px;color:#3c4147}
 .contact .links{margin-left:auto;display:flex;gap:14px;font-size:13px}
 .contact .links a{color:#5a6067;text-decoration-color:#c3c9d0;text-underline-offset:3px}
@@ -439,7 +440,7 @@ body.interacting iframe{pointer-events:none}
   body{background:var(--m-bg,var(--canvas));font-family:var(--m-body-font,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif);transition:background .35s}
   .artboard h1{font-family:var(--m-display,ui-serif,"New York",Georgia,serif);letter-spacing:var(--m-display-ls,-.015em);font-weight:var(--m-display-wt,600);color:var(--m-ink,#17191c);font-size:40px}
   .artboard h2,.artboard h3:not(.work-sub),.work .name{color:var(--m-ink,#17191c)}
-  .intro,.work .desc,.contact{color:var(--m-body,#5a6067)}
+  .intro,.work .desc,.contact,.disclosure{color:var(--m-body,#5a6067)}
   .kicker,.work-sub{color:var(--m-accent,#8a9099)}
   .btn{background:var(--m-accent,#17191c);color:var(--m-onaccent,#fff);border-color:transparent}
   .contact{flex-direction:column;align-items:flex-start;border-top-color:var(--m-line,#eceef1)}
