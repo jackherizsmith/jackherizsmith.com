@@ -1,0 +1,7 @@
+# HTML must always revalidate so new deploys show immediately.
+# Hashed assets under /assets/ are content-addressed, so cache them hard.
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
