@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read Only Everything · simulated demo</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--accent:#0e9db5;--ink:#1c1e21;--muted:#6b7076;--line:#e6e8ec;--bg:#f7f8fa}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  .top{display:flex;align-items:center;gap:10px;padding:14px 20px;background:#fff;border-bottom:1px solid var(--line)}
+  .mark{width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+  .top b{font-size:14px}
+  .chip{font-size:11px;font-weight:600;color:#0b6e7e;background:#d9f2f6;border-radius:99px;padding:3px 10px}
+  .top a{margin-left:auto;font-size:12px;color:var(--muted);text-decoration:none}
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
+  h1{font-size:22px;letter-spacing:-.01em;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:13.5px;line-height:1.55;margin-bottom:16px}
+  .sources{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px}
+  .sources i{
+    font-style:normal;display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
+    background:#fff;border:1px solid var(--line);border-radius:99px;padding:5px 11px 5px 6px;color:var(--muted);
+  }
+  .sources i b{width:17px;height:17px;border-radius:6px;color:#fff;display:grid;place-items:center;font-size:9.5px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#28c840;margin-left:2px}
+  .askbar{display:flex;gap:8px;margin-bottom:10px}
+  .askbar input{flex:1;font:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none}
+  .askbar input:focus{border-color:var(--accent)}
+  .askbar button{font:inherit;font-weight:700;font-size:13.5px;padding:0 18px;border:0;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer}
+  .sugg{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px}
+  .sugg button{font:inherit;font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:99px;background:#fff;color:var(--muted);cursor:pointer}
+  .sugg button:hover{color:var(--ink);border-color:#c9cdd4}
+  .block{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:16px;padding:0;overflow:hidden}
+  .block .q{padding:13px 16px;font-weight:650;font-size:14px;border-bottom:1px solid var(--line)}
+  .status{padding:12px 16px;color:var(--muted);font-size:12.5px}
+  .answer{padding:14px 16px;font-size:13.5px;line-height:1.6;color:#2c3036}
+  .answer b{color:var(--ink)}
+  .srcs{padding:0 16px 14px;display:grid;gap:8px}
+  .src{display:flex;gap:10px;align-items:flex-start;border:1px solid #eef0f3;border-radius:10px;padding:9px 11px}
+  .src b.badge{width:20px;height:20px;border-radius:7px;color:#fff;display:grid;place-items:center;font-size:10px;flex:none}
+  .src .t{font-size:12px;font-weight:650}
+  .src .s{font-size:11.5px;color:var(--muted);line-height:1.45}
+  .src .when{margin-left:auto;font-size:10.5px;color:#9aa0ab;white-space:nowrap}
+  @media (max-width:600px){.wrap{padding:20px 12px 60px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="mark">R</div><b>Read Only Everything</b>
+  <span class="chip">simulated demo · no AI, no real data</span>
+  <a href="https://jackherizsmith.com">part of jackherizsmith.com</a>
+</div>
+<div class="wrap">
+  <h1>One search across all of it</h1>
+  <p class="sub">Slack, Gmail, Calendar, Notion and the database, behind one question box. Read-only scopes by design, so it can be trusted everywhere. This demo answers six questions about a fictional homeware shop called Meadowline.</p>
+  <div class="sources">
+    <i><b style="background:#611f69">S</b>Slack<span class="dot"></span></i>
+    <i><b style="background:#c5221f">G</b>Gmail<span class="dot"></span></i>
+    <i><b style="background:#1a73e8">C</b>Calendar<span class="dot"></span></i>
+    <i><b style="background:#1c1e21">N</b>Notion<span class="dot"></span></i>
+    <i><b style="background:#7c5cf0">D</b>Data<span class="dot"></span></i>
+  </div>
+  <div class="askbar">
+    <input id="q" placeholder="e.g. when did we agree the launch date?" autocomplete="off">
+    <button id="ask">Search</button>
+  </div>
+  <div class="sugg" id="sugg"></div>
+  <div id="feed"></div>
+</div>
+
+<script>
+const SRC = {
+  slack:   { l:'S', c:'#611f69' },
+  gmail:   { l:'G', c:'#c5221f' },
+  cal:     { l:'C', c:'#1a73e8' },
+  notion:  { l:'N', c:'#1c1e21' },
+  data:    { l:'D', c:'#7c5cf0' },
+};
+
+const CANNED = [
+  {
+    match:['launch','garden','date','agree'],
+    q:'When did we agree to launch the garden range?',
+    scan:'Searching Slack (3 channels), Calendar, Notion…',
+    answer:'The launch was agreed for <b>Tuesday</b> in Monday’s product sync, with the teaser email going out Monday evening. Stock lands Thursday and photography wraps Friday, which is why Tuesday was the earliest safe date.',
+    srcs:[
+      ['slack','#product-sync · Priya','“Tuesday works. Email teaser Monday evening?”','Mon 10:04'],
+      ['cal','Garden range launch','All-day event, next Tuesday','next Tue'],
+      ['notion','Launch plan · Garden range','Timeline section, updated by Sam','Mon']
+    ]
+  },
+  {
+    match:['legal','referral','t&cs','terms'],
+    q:'What did legal say about the referral T&Cs?',
+    scan:'Searching Gmail (2 threads), Slack, Notion…',
+    answer:'Legal are reviewing and have promised an answer <b>by Friday</b>. Priya is chasing. If sign-off slips past Friday, referrals drop out of the launch email and move to the following send.',
+    srcs:[
+      ['gmail','RE: Referral programme T&Cs','“…aiming to come back to you by end of Friday at the latest.”','Tue 09:12'],
+      ['slack','#product-sync · Priya','“I’ll chase legal today. Deadline Friday or it slips.”','Mon 10:08'],
+      ['notion','Referral programme','Status: awaiting legal','Tue']
+    ]
+  },
+  {
+    match:['banner','delivery','copy','owns','who'],
+    q:'Who owns the delivery banner copy?',
+    scan:'Searching Slack, Notion…',
+    answer:'<b>Sam</b> owns it. He volunteered in Monday’s sync after the courier stats came in (87% of orders within three days) and it is logged as an action due this week.',
+    srcs:[
+      ['slack','#product-sync · Sam','“Worth a banner on the delivery page. I’ll draft copy.”','Mon 10:12'],
+      ['notion','Actions · w/c 12th','Delivery banner copy · Sam · this week','Mon']
+    ]
+  },
+  {
+    match:['aov','referral','average','order','value'],
+    q:'What is our AOV from referrals?',
+    scan:'Asking the data app…',
+    answer:'Referred customers average <b>£64.20 per order</b>, the highest of any channel and roughly two thirds more than marketplace buyers. This came straight from the database, not from anyone’s memory.',
+    srcs:[
+      ['data','SQL · orders × customers','SELECT avg(total)… GROUP BY acquisition_channel','just now'],
+      ['slack','#product-sync · Jo','“Referrals are our best AOV.”','Mon 10:05']
+    ]
+  },
+  {
+    match:['fern','meeting','next','when','studio'],
+    q:'When am I meeting Fern Studio next?',
+    scan:'Searching Calendar, Gmail…',
+    answer:'<b>Thursday at 14:00</b>, a 45-minute call to walk through the proposal. The proposal itself is due to Fern that morning, per the kickoff notes.',
+    srcs:[
+      ['cal','Fern Studio · proposal walkthrough','Thu 14:00 · 45 min · video','Thu'],
+      ['gmail','Fern Studio kickoff notes','“Proposal to you Thursday.”','last week']
+    ]
+  },
+  {
+    match:['voucher','oat','candle','win-back','decision'],
+    q:'Find the oat candle voucher decision',
+    scan:'Searching Slack, Notion…',
+    answer:'Approved in Monday’s sync: the win-back voucher goes to the <b>18 regulars</b> who have been quiet for 90+ days. Jo is setting it up Wednesday. The oat candle features because it is the shop’s most repeated purchase.',
+    srcs:[
+      ['slack','#product-sync · Jo','“Send the oat candle voucher. It always works.”','Mon 10:15'],
+      ['notion','Campaigns · win-back','Audience: 18 lapsed regulars · owner Jo','Mon'],
+      ['data','SQL · repeat purchases','Oat candle: 412 repeat orders, #1 of 48 products','cached']
+    ]
+  }
+];
+
+const feed = document.getElementById('feed');
+const input = document.getElementById('q');
+const sugg = document.getElementById('sugg');
+
+CANNED.forEach(c => {
+  const b = document.createElement('button');
+  b.textContent = c.q;
+  b.addEventListener('click', () => run(c));
+  sugg.append(b);
+});
+
+function pick(text){
+  const words = text.toLowerCase().split(/\W+/).filter(Boolean);
+  let best = null, bestScore = 0;
+  for (const c of CANNED){
+    const score = c.match.filter(m => words.some(w => w.startsWith(m))).length;
+    if (score > bestScore){ best = c; bestScore = score; }
+  }
+  return best;
+}
+
+function run(c){
+  const block = document.createElement('div');
+  block.className = 'block';
+  block.innerHTML = `<div class="q">${c.q}</div><div class="status">${c.scan}</div>`;
+  feed.prepend(block);
+  setTimeout(() => {
+    block.querySelector('.status').remove();
+    const a = document.createElement('div');
+    a.className = 'answer';
+    a.innerHTML = c.answer;
+    block.append(a);
+    const srcs = document.createElement('div');
+    srcs.className = 'srcs';
+    srcs.innerHTML = c.srcs.map(([k, t, s, when]) => `
+      <div class="src"><b class="badge" style="background:${SRC[k].c}">${SRC[k].l}</b>
+        <span><span class="t">${t}</span><br><span class="s">${s}</span></span>
+        <span class="when">${when}</span></div>`).join('');
+    block.append(srcs);
+  }, 1100);
+}
+
+function askFree(){
+  const text = input.value.trim();
+  if (!text) return;
+  const c = pick(text);
+  if (c){ run(c); input.value = ''; return; }
+  const block = document.createElement('div');
+  block.className = 'block';
+  block.innerHTML = `<div class="q">${text.replace(/</g,'&lt;')}</div>
+    <div class="answer">The demo knows six questions (the chips above). The real thing searches everything you connect, and never gets write access to any of it.</div>`;
+  feed.prepend(block);
+  input.value = '';
+}
+
+document.getElementById('ask').addEventListener('click', askFree);
+input.addEventListener('keydown', e => { if (e.key === 'Enter') askFree(); });
+</script>
+</body>
+</html>

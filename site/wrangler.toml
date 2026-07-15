@@ -1,0 +1,7 @@
+name = "jackherizsmith-v2"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-07-01"
+
+[[kv_namespaces]]
+binding = "COMMENTS"
+id = "fb3dd7c7946d47dfb90d9a0d74e52f9f"

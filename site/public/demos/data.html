@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data · simulated demo</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--blue:#3182CE;--ink:#1A202C;--muted:#718096;--line:#E2E8F0;--bg:#fff}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px}
+  .top{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line)}
+  .mark{width:26px;height:26px;border-radius:8px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+  .top b{font-size:14px}
+  .chip{font-size:11px;font-weight:600;color:#2b6cb0;background:#ebf4ff;border-radius:99px;padding:3px 10px}
+  .top a{margin-left:auto;font-size:12px;color:var(--muted);text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:26px 24px 90px}
+  .hd{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+  .hd h1{font-size:24px;letter-spacing:-.01em}
+  .hd .grow{flex:1}
+  .ghost{font:inherit;font-size:13px;color:var(--muted);background:none;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
+  .ghost:hover{background:#f7fafc;color:var(--ink)}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+  details.tips{border:1px solid var(--line);border-radius:10px;margin-bottom:16px;font-size:13px}
+  details.tips summary{padding:10px 14px;cursor:pointer;font-weight:600;color:#4A5568}
+  details.tips div{padding:0 14px 12px;color:var(--muted);line-height:1.7}
+  textarea#q{
+    width:100%;font:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);
+    border-radius:10px;resize:vertical;min-height:76px;outline:none;
+  }
+  textarea#q:focus{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+  .runrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0 6px}
+  .sugg{display:flex;gap:6px;flex-wrap:wrap}
+  .sugg button{font:inherit;font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:99px;background:#fff;color:var(--muted);cursor:pointer}
+  .sugg button:hover{color:var(--ink);border-color:#cbd5e0}
+  .primary{
+    font:inherit;font-weight:700;font-size:13.5px;padding:10px 18px;border:0;border-radius:8px;
+    background:var(--blue);color:#fff;cursor:pointer;white-space:nowrap;
+  }
+  .primary:disabled{opacity:.7}
+  .alert{
+    display:none;background:#FFF5F5;border:1px solid #FEB2B2;color:#C53030;
+    border-radius:8px;padding:10px 14px;font-size:12.5px;margin:10px 0;
+  }
+  .alert.on{display:block}
+  details.sqlacc{border:1px solid var(--line);border-radius:10px;margin:14px 0;display:none}
+  details.sqlacc.on{display:block}
+  details.sqlacc summary{padding:10px 14px;cursor:pointer;font-weight:600;font-size:13px;color:#4A5568}
+  .sqlbody{padding:0 14px 12px}
+  textarea#sql{
+    width:100%;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;background:#F7FAFC;
+    border:1px solid var(--line);border-radius:8px;padding:12px;min-height:120px;resize:vertical;outline:none;color:#2D3748;
+  }
+  .sqlrow{display:flex;justify-content:flex-end;margin-top:8px}
+  .notes{display:none;font-size:12.5px;color:var(--muted);border-left:3px solid var(--line);padding:2px 12px;margin:12px 0}
+  .notes.on{display:block}
+  .notes b{color:#4A5568}
+  #results{display:none;margin-top:18px}
+  #results.on{display:block}
+  .rbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .rbar h2{font-size:16px}
+  .badge{font-size:11px;font-weight:600;background:#EDF2F7;color:#4A5568;border-radius:6px;padding:2px 8px}
+  .toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:8px}
+  .toggle button{font:inherit;font-size:12.5px;font-weight:600;padding:6px 14px;background:#fff;border:0;cursor:pointer;color:var(--muted)}
+  .toggle button.on{background:var(--blue);color:#fff}
+  .rbar .grow{flex:1}
+  .rbar .tool{font:inherit;font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px 11px;cursor:pointer;color:#4A5568}
+  .rbar .tool:hover{background:#f7fafc}
+  .loadnote{font-size:11.5px;color:var(--muted)}
+  table.res{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+  table.res th{
+    background:#F7FAFC;text-align:left;font-size:11px;font-weight:700;color:#4A5568;
+    padding:8px 12px;border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,monospace;
+  }
+  table.res td{padding:7px 12px;border-bottom:1px solid #EDF2F7;white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+  #chartPane{display:none}
+  .ctrls{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:#4A5568}
+  .ctrl label{display:block;font-weight:700;font-size:11px;margin-bottom:4px}
+  .ctrl select{font:inherit;font-size:12.5px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:#fff}
+  .ctrl .checks{display:flex;gap:10px;flex-wrap:wrap;padding-top:5px}
+  .ctrl .checks label{font-weight:500;font-size:12px;display:flex;gap:5px;align-items:center;margin:0}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:8px;font-size:12px}
+  .legend span{display:flex;gap:6px;align-items:center;cursor:pointer}
+  .legend i{width:10px;height:10px;border-radius:3px}
+  .legend .off{color:#aaa}
+  .legend .off i{background:#aaa!important}
+  #tip{
+    position:fixed;display:none;background:#fff;border:1px solid var(--line);border-radius:8px;
+    box-shadow:0 6px 20px rgba(26,32,44,.15);padding:8px 12px;font-size:12px;pointer-events:none;z-index:50;
+  }
+  #tip .row{display:flex;gap:8px;align-items:center;padding:1px 0}
+  #tip i{width:8px;height:8px;border-radius:2px}
+  #tip .tot{border-top:1px solid var(--line);margin-top:4px;padding-top:4px;font-weight:700}
+  @media (max-width:700px){.wrap{padding:18px 12px 60px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="mark">D</div><b>Data</b>
+  <span class="chip">simulated demo · no AI, fictional shop data</span>
+  <a href="https://jackherizsmith.com">part of jackherizsmith.com</a>
+</div>
+<div class="wrap">
+  <div class="hd">
+    <h1>Data</h1>
+    <div class="grow"></div>
+    <button class="ghost" id="savedBtn">Saved (0)</button>
+    <button class="ghost">Prompt</button>
+  </div>
+  <p class="sub">Ask questions in plain English. SQL is generated automatically. This demo runs against Meadowline, a fictional homeware shop, and knows six questions well.</p>
+
+  <details class="tips">
+    <summary>How to write a good query</summary>
+    <div>
+      • Use business terms freely: "repeat customers", "the garden range", "lapsed regulars"<br>
+      • Name a time window when it matters: "in the last 90 days"<br>
+      • One question at a time beats three at once<br>
+      <i>e.g. "How many customers ordered twice in the last 90 days?"</i>
+    </div>
+  </details>
+
+  <textarea id="q" placeholder="e.g. How many customers ordered twice in the last 90 days?"></textarea>
+  <div class="runrow">
+    <div class="sugg" id="sugg"></div>
+    <button class="primary" id="run">Run Query</button>
+  </div>
+
+  <div class="alert" id="alert"></div>
+
+  <details class="sqlacc" id="sqlacc">
+    <summary>SQL</summary>
+    <div class="sqlbody">
+      <textarea id="sql" spellcheck="false" placeholder="SELECT ..."></textarea>
+      <div class="sqlrow"><button class="primary" id="runsql">Run SQL</button></div>
+    </div>
+  </details>
+
+  <p class="notes" id="notes"></p>
+
+  <div id="results">
+    <div class="rbar">
+      <h2>Results</h2>
+      <span class="badge" id="rowbadge"></span>
+      <div class="toggle"><button id="tbtn" class="on">Table</button><button id="cbtn">Chart</button></div>
+      <span class="loadnote" id="loadnote"></span>
+      <div class="grow"></div>
+      <button class="tool" id="copysql">Copy SQL</button>
+      <button class="tool" id="csv">Export CSV</button>
+      <button class="tool" id="save">Save query</button>
+    </div>
+    <div id="tablePane"></div>
+    <div id="chartPane">
+      <div class="ctrls" id="ctrls"></div>
+      <div id="chart"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+</div>
+<div id="tip"></div>
+
+<script>
+const COLOURS = ['#3182CE','#E53E3E','#38A169','#D69E2E','#805AD5'];
+
+const Q = [
+  {
+    match:['revenue','month','sales'],
+    q:'Revenue by month for the last six months',
+    sql:`SELECT to_char(date_trunc('month', o.placed_at), 'Mon') AS month,
+       sum(oi.quantity * oi.unit_price_pence) / 100 AS total_revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.id
+WHERE o.placed_at >= now() - interval '6 months'
+GROUP BY date_trunc('month', o.placed_at)
+ORDER BY date_trunc('month', o.placed_at);`,
+    cols:['month','total_revenue'],
+    rows:[['Feb',18340],['Mar',21110],['Apr',19876],['May',24509],['Jun',27144],['Jul',23930]],
+    notes:'Revenue is item totals in GBP, excluding refunds. Months are calendar months.'
+  },
+  {
+    match:['channel','split','breakdown','acquisition'],
+    q:'Revenue by month split by acquisition channel',
+    sql:`SELECT to_char(date_trunc('month', o.placed_at), 'Mon') AS month,
+       c.acquisition_channel AS channel,
+       sum(o.total_pence) / 100 AS revenue
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+WHERE o.placed_at >= now() - interval '6 months'
+GROUP BY 1, 2, date_trunc('month', o.placed_at)
+ORDER BY date_trunc('month', o.placed_at), channel;`,
+    cols:['month','channel','revenue'],
+    rows:[
+      ['Feb','Referral',5210],['Feb','Organic',6120],['Feb','Instagram',4230],['Feb','Paid',2780],
+      ['Mar','Referral',6480],['Mar','Organic',6650],['Mar','Instagram',4890],['Mar','Paid',3090],
+      ['Apr','Referral',6110],['Apr','Organic',6390],['Apr','Instagram',4560],['Apr','Paid',2816],
+      ['May','Referral',8140],['May','Organic',7210],['May','Instagram',5820],['May','Paid',3339],
+      ['Jun','Referral',9530],['Jun','Organic',7690],['Jun','Instagram',6410],['Jun','Paid',3514],
+      ['Jul','Referral',8390],['Jul','Organic',7020],['Jul','Instagram',5480],['Jul','Paid',3040]
+    ],
+    chart:{x:'month',series:'channel',value:'revenue'},
+    notes:'Channel comes from the customer record, not the order, so channel-switchers count under their first channel.'
+  },
+  {
+    match:['repeat','top','products'],
+    q:'Top products by repeat purchases',
+    sql:`SELECT p.name AS product_name,
+       count(*) AS repeat_orders
+FROM order_items oi
+JOIN products p ON p.id = oi.product_id
+JOIN customer_order_ranks r ON r.order_id = oi.order_id
+WHERE r.order_rank > 1
+GROUP BY p.name
+ORDER BY repeat_orders DESC
+LIMIT 5;`,
+    cols:['product_name','repeat_orders'],
+    rows:[['Oat candle, large',412],['Linen apron',301],['Stoneware mug',277],['Walnut trivet',198],['Field notes tin',142]],
+    notes:'A repeat purchase is any item on a customer’s second or later order.'
+  },
+  {
+    match:['churn','risk','lapsed','quiet'],
+    q:'Which customers look at risk of churning?',
+    heal:true,
+    badSql:`SELECT c.full_name AS customer_name,
+       max(o.placed_at)::date AS last_order_date
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+GROUP BY c.full_name
+HAVING now()::date - max(o.placed_at)::date > 90;`,
+    healError:'column c.full_name does not exist [E004]',
+    sql:`SELECT c.name AS customer_name,
+       max(o.placed_at)::date AS last_order_date,
+       now()::date - max(o.placed_at)::date AS days_since_order,
+       count(*) AS lifetime_orders
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+GROUP BY c.name
+HAVING count(*) >= 3
+   AND now()::date - max(o.placed_at)::date > 90
+ORDER BY days_since_order DESC
+LIMIT 5;`,
+    cols:['customer_name','last_order_date','days_since_order','lifetime_orders'],
+    rows:[['R. Okafor','2026-03-14',123,7],['H. Lindqvist','2026-03-29',108,5],['P. Doyle','2026-04-11',95,4],['S. Mercer','2026-04-12',94,6],['A. Whitfield','2026-04-14',92,3]],
+    notes:'At risk means three or more lifetime orders and nothing in 90+ days. 18 customers match; showing the quietest five.'
+  },
+  {
+    match:['average','aov','value'],
+    q:'Average order value by acquisition channel',
+    sql:`SELECT c.acquisition_channel,
+       round(avg(o.total_pence) / 100.0, 2) AS avg_order_value,
+       count(*) AS orders
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+GROUP BY c.acquisition_channel
+ORDER BY avg_order_value DESC;`,
+    cols:['acquisition_channel','avg_order_value','orders'],
+    rows:[['Referral',64.2,812],['Organic',51.75,1490],['Instagram',43.1,1174],['Paid',38.44,927]],
+    notes:'Averages include delivery fees. Marketplace orders are excluded as channel is unknown.'
+  },
+  {
+    match:['delivery','arrive','days','shipping'],
+    q:'What share of orders arrives within three days?',
+    sql:`SELECT round(100.0 * count(*) FILTER (WHERE delivered_at - placed_at <= interval '3 days')
+       / count(*), 1) AS within_3_days_pct,
+       count(*) AS orders_measured
+FROM orders
+WHERE delivered_at IS NOT NULL
+  AND placed_at >= now() - interval '90 days';`,
+    cols:['within_3_days_pct','orders_measured'],
+    rows:[[87.4,1963]],
+    notes:'Only delivered orders are measured, so open orders do not drag the figure down.'
+  }
+];
+
+let current = null;
+let saved = 0;
+let chartLoadedOnce = false;
+const st = { view:'table', type:'Bar', x:0, ys:[], series:-1, value:-1, mode:'Default', hidden:new Set() };
+
+const el = id => document.getElementById(id);
+const sugg = el('sugg');
+Q.forEach(c => {
+  const b = document.createElement('button');
+  b.textContent = c.q;
+  b.addEventListener('click', () => { el('q').value = c.q; run(c); });
+  sugg.append(b);
+});
+
+function pick(text){
+  const words = text.toLowerCase().split(/\W+/).filter(Boolean);
+  let best = null, score = 0;
+  for (const c of Q){
+    const s = c.match.filter(m => words.some(w => w.startsWith(m))).length;
+    if (s > score){ best = c; score = s; }
+  }
+  return best;
+}
+
+el('run').addEventListener('click', () => {
+  const c = pick(el('q').value) ?? null;
+  if (c) run(c);
+  else flashAlert('The demo knows six questions (the chips above). The real thing compiles anything. [Q005]');
+});
+el('q').addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') el('run').click();
+});
+
+function flashAlert(msg){
+  const a = el('alert');
+  a.textContent = msg;
+  a.classList.add('on');
+  setTimeout(() => a.classList.remove('on'), 4200);
+}
+
+function run(c){
+  current = c;
+  const btn = el('run');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  el('results').classList.remove('on');
+  el('notes').classList.remove('on');
+  el('alert').classList.remove('on');
+  const acc = el('sqlacc');
+  acc.classList.add('on');
+  acc.open = false;
+
+  const finish = () => {
+    el('sql').value = c.sql;
+    el('notes').innerHTML = `<b>Notes</b> · ${c.notes}`;
+    el('notes').classList.add('on');
+    btn.disabled = false;
+    btn.textContent = 'Run Query';
+    renderResults(c);
+  };
+
+  if (c.heal){
+    setTimeout(() => { el('sql').value = c.badSql; acc.open = true; }, 700);
+    setTimeout(() => { flashAlert(c.healError); btn.textContent = 'Fixing…'; }, 1400);
+    setTimeout(() => { el('alert').classList.remove('on'); finish(); }, 2600);
+  } else {
+    setTimeout(finish, 900);
+  }
+}
+
+el('runsql').addEventListener('click', () => {
+  if (!current) return;
+  const b = el('runsql');
+  b.textContent = 'Running…';
+  setTimeout(() => {
+    b.textContent = 'Run SQL';
+    renderResults(current);
+    flashAlert('Demo note: hand-edited SQL re-runs the canned result. The real app executes exactly what you wrote.');
+  }, 700);
+});
+
+function renderResults(c){
+  st.view = 'table';
+  st.type = 'Bar';
+  st.x = 0;
+  st.series = c.chart ? c.cols.indexOf(c.chart.series) : -1;
+  st.value = c.chart ? c.cols.indexOf(c.chart.value) : -1;
+  st.ys = c.cols.map((_, i) => i).filter(i => typeof c.rows[0][i] === 'number').slice(0, 2);
+  st.mode = 'Default';
+  st.hidden = new Set();
+  chartLoadedOnce = false;
+  el('rowbadge').textContent = `${c.rows.length.toLocaleString()} row${c.rows.length === 1 ? '' : 's'}`;
+  el('tbtn').classList.add('on');
+  el('cbtn').classList.remove('on');
+  el('tablePane').style.display = '';
+  el('chartPane').style.display = 'none';
+  el('loadnote').textContent = '';
+  el('tablePane').innerHTML = `<table class="res"><thead><tr>${c.cols.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${
+    c.rows.map(r => `<tr>${r.map(v => `<td>${v === null ? '<i style="color:#A0AEC0">null</i>' : typeof v === 'number' ? v.toLocaleString() : v}</td>`).join('')}</tr>`).join('')
+  }</tbody></table>`;
+  el('results').classList.add('on');
+}
+
+el('tbtn').addEventListener('click', () => {
+  st.view = 'table';
+  el('tbtn').classList.add('on'); el('cbtn').classList.remove('on');
+  el('tablePane').style.display = ''; el('chartPane').style.display = 'none';
+  el('loadnote').textContent = '';
+});
+el('cbtn').addEventListener('click', () => {
+  st.view = 'chart';
+  el('cbtn').classList.add('on'); el('tbtn').classList.remove('on');
+  el('tablePane').style.display = 'none'; el('chartPane').style.display = '';
+  if (!chartLoadedOnce){
+    el('loadnote').textContent = 'Loading all rows…';
+    setTimeout(() => {
+      el('loadnote').textContent = `Charting all ${current.rows.length} rows`;
+      chartLoadedOnce = true;
+      drawControls(); drawChart();
+    }, 600);
+  } else { drawControls(); drawChart(); }
+});
+
+el('copysql').addEventListener('click', () => {
+  navigator.clipboard.writeText(el('sql').value);
+  el('copysql').textContent = 'Copied!';
+  setTimeout(() => { el('copysql').textContent = 'Copy SQL'; }, 1400);
+});
+el('csv').addEventListener('click', () => {
+  if (!current) return;
+  const csv = [current.cols.join(','), ...current.rows.map(r => r.join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'export.csv';
+  a.click();
+});
+el('save').addEventListener('click', () => {
+  saved++;
+  el('savedBtn').textContent = `Saved (${saved})`;
+  el('save').textContent = 'Saved ✓';
+  setTimeout(() => { el('save').textContent = 'Save query'; }, 1400);
+});
+
+function drawControls(){
+  const c = current;
+  const numeric = c.cols.map((_, i) => i).filter(i => typeof c.rows[0][i] === 'number');
+  const seriesable = c.cols.map((_, i) => i).filter(i => typeof c.rows[0][i] === 'string');
+  let html = `
+    <div class="ctrl"><label>Chart type</label>
+      <select id="ctype">${['Bar','Line','Combined'].map(t => `<option${t === st.type ? ' selected' : ''}>${t}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>X axis</label>
+      <select id="cx">${c.cols.map((col, i) => `<option value="${i}"${i === st.x ? ' selected' : ''}>${col}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Series</label>
+      <select id="cs"><option value="-1">None</option>${seriesable.filter(i => i !== st.x).map(i => `<option value="${i}"${i === st.series ? ' selected' : ''}>${c.cols[i]}</option>`).join('')}</select></div>`;
+  if (st.series >= 0){
+    html += `
+    <div class="ctrl"><label>Value</label>
+      <select id="cv">${numeric.map(i => `<option value="${i}"${i === st.value ? ' selected' : ''}>${c.cols[i]}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Mode</label>
+      <div class="checks">${['Default','Stack','Aggregate'].map(m => `<label><input type="radio" name="mode" value="${m}"${m === st.mode ? ' checked' : ''}>${m}</label>`).join('')}</div></div>`;
+  } else {
+    html += `
+    <div class="ctrl"><label>Y axis</label>
+      <div class="checks">${numeric.map(i => `<label><input type="checkbox" data-y="${i}"${st.ys.includes(i) ? ' checked' : ''}>${c.cols[i]}</label>`).join('')}</div></div>`;
+  }
+  el('ctrls').innerHTML = html;
+  el('ctype').addEventListener('change', e => { st.type = e.target.value; drawChart(); });
+  el('cx').addEventListener('change', e => { st.x = Number(e.target.value); drawChart(); });
+  el('cs').addEventListener('change', e => { st.series = Number(e.target.value); if (st.series >= 0 && st.value < 0) st.value = numeric[0]; st.hidden = new Set(); drawControls(); drawChart(); });
+  el('cv')?.addEventListener('change', e => { st.value = Number(e.target.value); drawChart(); });
+  document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', e => { st.mode = e.target.value; drawChart(); }));
+  document.querySelectorAll('input[data-y]').forEach(cb => cb.addEventListener('change', () => {
+    st.ys = [...document.querySelectorAll('input[data-y]:checked')].map(x => Number(x.dataset.y));
+    drawChart();
+  }));
+}
+
+function seriesData(){
+  const c = current;
+  if (st.series >= 0){
+    const xs = [...new Set(c.rows.map(r => r[st.x]))];
+    let names = [...new Set(c.rows.map(r => r[st.series]))];
+    if (st.mode === 'Aggregate'){
+      const totals = xs.map(x => c.rows.filter(r => r[st.x] === x).reduce((a, r) => a + r[st.value], 0));
+      return { xs, series: [{ name: '_total', vals: totals }] };
+    }
+    const series = names.map(n => ({
+      name: n,
+      vals: xs.map(x => c.rows.filter(r => r[st.x] === x && r[st.series] === n).reduce((a, r) => a + r[st.value], 0)),
+    }));
+    return { xs, series };
+  }
+  const xs = c.rows.map(r => r[st.x]);
+  return { xs, series: st.ys.map(i => ({ name: c.cols[i], vals: c.rows.map(r => r[i]) })) };
+}
+
+function drawChart(){
+  const { xs, series } = seriesData();
+  const shown = series.filter(s => !st.hidden.has(s.name));
+  const chart = el('chart');
+  if (!shown.length){
+    chart.innerHTML = '<p style="color:#718096;font-size:13px;padding:40px 0;text-align:center">Select at least one Y axis column to render a chart.</p>';
+    el('legend').innerHTML = '';
+    return;
+  }
+  const W = 1040, H = 320, padL = 56, padB = 28, padT = 12;
+  const stacked = st.mode === 'Stack' && (st.type === 'Bar' || st.type === 'Combined');
+  const maxVal = stacked
+    ? Math.max(...xs.map((_, xi) => shown.reduce((a, s) => a + s.vals[xi], 0)))
+    : Math.max(...shown.flatMap(s => s.vals));
+  const yScale = v => H - padB - (v / maxVal) * (H - padB - padT);
+  const xw = (W - padL) / xs.length;
+  let svg = '';
+  for (let t = 0; t <= 4; t++){
+    const v = maxVal / 4 * t, y = yScale(v);
+    svg += `<line x1="${padL}" y1="${y}" x2="${W}" y2="${y}" stroke="#EDF2F7"/>
+      <text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="10" fill="#A0AEC0">${Math.round(v).toLocaleString()}</text>`;
+  }
+  xs.forEach((x, i) => {
+    svg += `<text x="${padL + i * xw + xw / 2}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#718096">${x}</text>`;
+  });
+  const colourOf = i => COLOURS[i % COLOURS.length];
+  const barSeries = st.type === 'Combined' ? [shown[0]] : st.type === 'Bar' ? shown : [];
+  const lineSeries = st.type === 'Combined' ? shown.slice(1) : st.type === 'Line' ? shown : [];
+
+  if (barSeries.length){
+    const groups = stacked ? 1 : barSeries.length;
+    const bw = Math.min(38, (xw - 14) / groups);
+    xs.forEach((_, xi) => {
+      let accY = yScale(0);
+      barSeries.forEach((s, si) => {
+        const v = s.vals[xi];
+        const sIdx = series.indexOf(s);
+        const h = yScale(0) - yScale(v);
+        const x = stacked
+          ? padL + xi * xw + (xw - bw) / 2
+          : padL + xi * xw + (xw - bw * groups) / 2 + si * bw;
+        const y = stacked ? accY - h : yScale(v);
+        if (stacked) accY -= h;
+        svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" rx="3"
+          fill="${colourOf(sIdx)}" data-x="${xi}" class="hit"/>`;
+      });
+    });
+  }
+  lineSeries.forEach(s => {
+    const sIdx = series.indexOf(s);
+    const pts = s.vals.map((v, xi) => `${(padL + xi * xw + xw / 2).toFixed(1)},${yScale(v).toFixed(1)}`).join(' ');
+    svg += `<polyline points="${pts}" fill="none" stroke="${colourOf(sIdx)}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    s.vals.forEach((v, xi) => {
+      svg += `<circle cx="${(padL + xi * xw + xw / 2).toFixed(1)}" cy="${yScale(v).toFixed(1)}" r="3.5" fill="${colourOf(sIdx)}" data-x="${xi}" class="hit"/>`;
+    });
+  });
+  chart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:320px">${svg}</svg>`;
+
+  el('legend').innerHTML = series.map((s, i) => `
+    <span data-n="${s.name}" class="${st.hidden.has(s.name) ? 'off' : ''}"><i style="background:${colourOf(i)}"></i>${s.name}</span>`).join('');
+  el('legend').querySelectorAll('span').forEach(sp => sp.addEventListener('click', () => {
+    const n = sp.dataset.n;
+    if (st.hidden.has(n)) st.hidden.delete(n); else st.hidden.add(n);
+    drawChart();
+  }));
+
+  const tip = el('tip');
+  chart.querySelectorAll('.hit').forEach(elm => {
+    elm.addEventListener('mousemove', e => {
+      const xi = Number(elm.dataset.x);
+      const rows = shown.map((s, i) => `<div class="row"><i style="background:${colourOf(series.indexOf(s))}"></i>${s.name}: <b>${s.vals[xi].toLocaleString()}</b></div>`).join('');
+      const total = shown.length > 1 ? `<div class="tot">Total ${shown.reduce((a, s) => a + s.vals[xi], 0).toLocaleString()}</div>` : '';
+      tip.innerHTML = `<b>${xs[xi]}</b>${rows}${total}`;
+      tip.style.display = 'block';
+      tip.style.left = `${Math.min(e.clientX + 14, innerWidth - 190)}px`;
+      tip.style.top = `${e.clientY + 12}px`;
+    });
+    elm.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  });
+}
+</script>
+</body>
+</html>

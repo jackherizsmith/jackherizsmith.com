@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notes · simulated demo</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--ink:#1c1e21;--muted:#6b7076;--line:#e6e8ec;--bg:#f7f8fa;--teal:#0d9488;--red:#dc2626;--play:#4b5563}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px}
+  .top{display:flex;align-items:center;gap:10px;padding:14px 20px;background:#fff;border-bottom:1px solid var(--line)}
+  .mark{width:26px;height:26px;border-radius:8px;background:var(--teal);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+  .top b{font-size:14px}
+  .chip{font-size:11px;font-weight:600;color:#0e6e66;background:#d8f1ee;border-radius:99px;padding:3px 10px}
+  .top a{margin-left:auto;font-size:12px;color:var(--muted);text-decoration:none}
+
+  /* generator */
+  .wrap{max-width:720px;margin:0 auto;padding:26px 20px 80px}
+  h1{font-size:21px;letter-spacing:-.01em;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:20px}
+  .step{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+  .mode{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .mode b{display:block;font-size:12.5px}
+  .mode span{font-size:10.5px;color:var(--muted);line-height:1.4}
+  .mode.dis{opacity:.45}
+  .mode.on{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+  .samples{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+  .samples button{font:inherit;font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:99px;background:#fff;color:var(--muted);cursor:pointer}
+  .samples button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  textarea{width:100%;height:170px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;resize:vertical;outline:none;color:#3c4147}
+  .types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .type{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;cursor:pointer;text-align:left;font:inherit}
+  .type.on{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+  .type b{display:block;font-size:12.5px;margin-bottom:3px}
+  .type span{font-size:10.5px;color:var(--muted);line-height:1.45}
+  .guess{font-size:11px;color:var(--teal);font-weight:600;margin-left:8px}
+  .details-row{display:flex;gap:10px;align-items:center;margin-top:6px}
+  .details-row select{font:inherit;font-size:12.5px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+  .details-row .note{font-size:11px;color:var(--muted)}
+  .go{margin-top:16px;font:inherit;font-weight:700;font-size:13.5px;padding:11px 20px;border:0;border-radius:11px;background:var(--teal);color:#fff;cursor:pointer}
+  .go:disabled{opacity:.6}
+  .proc{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;display:none}
+  .proc.on{display:block}
+  .proc .lbl{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .segs{display:flex;gap:6px}
+  .seg{flex:1;height:6px;border-radius:3px;background:#e9edf0;overflow:hidden;position:relative}
+  .seg i{position:absolute;inset:0;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform 1.1s linear}
+  .seg.fill i{transform:scaleX(1)}
+  .segnames{display:flex;gap:6px;margin-top:6px}
+  .segnames span{flex:1;font-size:10px;color:var(--muted);text-align:center}
+
+  /* note page */
+  #noteView{display:none}
+  #noteView.on{display:block}
+  .nnav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+  .nnav .in{max-width:896px;margin:0 auto;padding:0 24px;height:48px;display:flex;align-items:center;justify-content:space-between}
+  .nnav button{font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer}
+  .nnav button:hover{color:var(--ink)}
+  .nnav .t{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+  .page{max-width:896px;margin:0 auto;padding:22px 24px 40px;font-size:13.5px;line-height:1.6;color:#374151}
+  .page h1{font-size:23px;font-weight:700;color:#111827;margin:0 0 4px}
+  .page h2{font-size:16px;font-weight:600;color:#111827;margin:26px 0 10px}
+  .eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 10px;border-radius:99px}
+  .chips-row{display:flex;gap:6px;flex-wrap:wrap}
+  .pchip{font-size:11px;font-weight:500;background:#f3f4f6;border-radius:99px;padding:3px 10px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+  th{background:#f9fafb;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;text-align:left;padding:8px 10px;cursor:pointer;user-select:none;white-space:nowrap}
+  td{padding:8px 10px;border-top:1px solid #f3f4f6;vertical-align:top}
+  th.num,td.num{width:32px;text-align:center;color:#9ca3af}
+  .cell-hi{background:#fee2e2;border-radius:6px;padding:1px 8px;font-weight:600;font-size:11px;display:inline-block}
+  .cell-med{background:#fef3c7;border-radius:6px;padding:1px 8px;font-weight:600;font-size:11px;display:inline-block}
+  .cell-low{background:#dcfce7;border-radius:6px;padding:1px 8px;font-weight:600;font-size:11px;display:inline-block}
+  details.src{margin-top:28px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:10px 14px;font-size:12px;color:#6b7280}
+  details.src pre{margin-top:8px;max-height:240px;overflow-y:auto;font-size:11px;line-height:1.5;white-space:pre-wrap}
+  .nfoot{margin-top:24px;padding:26px 0;border-top:1px solid #e5e7eb;text-align:center;font-size:11px;color:#9ca3af}
+  ul.plain{list-style:none}
+  ul.plain li{padding:4px 0 4px 16px;position:relative}
+  ul.plain li::before{content:"•";position:absolute;left:2px}
+  .score-details summary{cursor:pointer;font-weight:600;font-size:12.5px}
+  .score-details{margin-top:12px;background:rgba(255,255,255,.75);border-radius:10px;padding:10px 14px}
+  .sticky-note{border-radius:10px;padding:12px;font-size:12px;line-height:1.5;box-shadow:0 4px 10px rgba(17,24,39,.12);color:#374151}
+  @media (max-width:640px){.modes,.types{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="mark">N</div><b>Notes</b>
+  <span class="chip">simulated demo · pre-written notes, no AI</span>
+  <a href="https://jackherizsmith.com">part of jackherizsmith.com</a>
+</div>
+
+<div id="genView" class="wrap">
+  <h1>Generate a note</h1>
+  <p class="sub">Drop in a transcript, a CSV, a Notion page or a video. Out comes a designed, self-contained webpage: every note type has its own layout, colour scheme and scorecards. This demo generates three pre-written notes from three sample sources.</p>
+
+  <div class="step">1. Source</div>
+  <div class="modes">
+    <div class="mode dis"><b>File</b><span>CSV · PDF · Markdown · Video · Audio</span></div>
+    <div class="mode dis"><b>Link</b><span>Notion · Figma · Webpage</span></div>
+    <div class="mode on"><b>Text</b><span>Paste notes, transcript, etc.</span></div>
+  </div>
+  <div class="samples" id="samples"></div>
+  <textarea id="src" spellcheck="false" readonly></textarea>
+
+  <div class="step">2. Note type <span class="guess" id="guess"></span></div>
+  <div class="types" id="types"></div>
+
+  <div class="step">3. Details</div>
+  <div class="details-row">
+    <select id="customer"><option>Meadowline</option><option>Fern Studio</option><option>No customer</option></select>
+    <span class="note">Populated automatically</span>
+  </div>
+
+  <button class="go" id="go">Generate note</button>
+
+  <div class="proc" id="proc">
+    <div class="lbl" id="procLbl">Queuing…</div>
+    <div class="segs"><div class="seg" id="s0"><i></i></div><div class="seg" id="s1"><i></i></div><div class="seg" id="s2"><i></i></div></div>
+    <div class="segnames"><span>Triage</span><span>Generate note</span><span>Review accuracy</span></div>
+  </div>
+</div>
+
+<div id="noteView">
+  <div class="nnav"><div class="in">
+    <button id="backBtn" type="button">← Notes</button>
+    <span class="t" id="navTitle"></span>
+  </div></div>
+  <div class="page" id="notePage"></div>
+</div>
+
+<script>
+const SAMPLES = [
+  {
+    label: 'Account call transcript',
+    type: 0,
+    customer: 'Meadowline',
+    text:
+`[10:02] Priya (Meadowline): The garden range project wrapped last week, results were great.
+[10:04] Jack: Opt-in was 34%, completion 81%. Solid. How is the team finding the dashboard?
+[10:05] Jo (Meadowline): Three of us are in weekly now. Though March was rough, the courier switch caused complaints.
+[10:07] Jack: Response rates recovered to 81% by April. Anything blocking the next project?
+[10:08] Priya: Legal are still on the referral T&Cs. Friday deadline or it slips the launch email.
+[10:11] Jo: One more thing. We keep being asked about a trade programme. Is that something you could support?
+[10:12] Jack: Yes, and worth scoping properly. I will draft a pilot proposal.
+[10:14] Priya: Renewal is Q4 by the way, we have not discussed terms yet.
+[10:15] Jack: Noted. I will send the win-back voucher setup Wednesday and the trade pilot next week.`
+  },
+  {
+    label: 'Incident thread',
+    type: 1,
+    customer: 'No customer',
+    text:
+`19:41 Sam: checkout is throwing 502s, seeing spikes in the error channel
+19:43 Jack: confirmed, orders API timing out. digging in
+19:47 Jack: migration 0231 added an index on orders without CONCURRENTLY. lock queue is stacking up during peak
+19:52 Jack: killed the migration, locks draining
+20:05 Sam: checkouts recovering, error rate back under 1%
+20:22 Jack: fully green. 41 minutes end to end
+20:24 Sam: rough count: 214 failed checkouts, 12 support tickets
+20:30 Jack: writing this up properly. we need a migration checklist and an off-peak window`
+  },
+  {
+    label: 'Brainstorm notes',
+    type: 2,
+    customer: 'No customer',
+    text:
+`Spring campaign brainstorm, whole team, 45 min.
+Retail moments: mother's day bundle, easter table setting kit, "spring reset" edit, garden range relaunch, market stall pop-up, sunday-evening drop
+Content: behind the scenes at the pottery, care guide series, founder Q&A, customer homes photo series
+Community: referral doubles month, review-for-voucher push, top-100 customers early access, postcard in every parcel, birthday surprises
+Partnerships: florist cross-promo, coffee roaster gift box, interiors newsletter swap
+Next: pick two retail moments, cost the pop-up, brief the photographer`
+  }
+];
+
+const TYPES = [
+  { label: 'Customer Meeting', desc: 'Account calls: relationship health, expansion signals, and actions.' },
+  { label: 'Incident Report', desc: 'Post-mortems: timeline, root cause, impact, and action items.' },
+  { label: 'Brainstorm', desc: 'Idea sessions: themes, sticky notes, and next steps.' }
+];
+
+let sample = 0, chosenType = 0;
+
+const samplesEl = document.getElementById('samples');
+const typesEl = document.getElementById('types');
+const srcEl = document.getElementById('src');
+const guessEl = document.getElementById('guess');
+const customerEl = document.getElementById('customer');
+
+SAMPLES.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.textContent = s.label;
+  b.addEventListener('click', () => pickSample(i));
+  samplesEl.append(b);
+});
+TYPES.forEach((t, i) => {
+  const b = document.createElement('button');
+  b.className = 'type';
+  b.innerHTML = `<b>${t.label}</b><span>${t.desc}</span>`;
+  b.addEventListener('click', () => pickType(i));
+  typesEl.append(b);
+});
+
+function pickType(i){
+  chosenType = i;
+  [...typesEl.children].forEach((el, j) => el.classList.toggle('on', j === i));
+}
+function pickSample(i){
+  sample = i;
+  [...samplesEl.children].forEach((el, j) => el.classList.toggle('on', j === i));
+  srcEl.value = SAMPLES[i].text;
+  customerEl.value = SAMPLES[i].customer;
+  guessEl.textContent = 'Guessing…';
+  setTimeout(() => {
+    guessEl.textContent = 'Guessed';
+    pickType(SAMPLES[i].type);
+  }, 700);
+}
+pickSample(0);
+
+const go = document.getElementById('go');
+go.addEventListener('click', () => {
+  go.disabled = true;
+  go.textContent = 'Queuing…';
+  const proc = document.getElementById('proc');
+  proc.classList.add('on');
+  const lbl = document.getElementById('procLbl');
+  const steps = [['Triage', 's0'], ['Generating note', 's1'], ['Reviewing accuracy', 's2']];
+  steps.forEach(([name, id], i) => {
+    setTimeout(() => {
+      lbl.textContent = name + '…';
+      document.getElementById(id).classList.add('fill');
+    }, 400 + i * 1150);
+  });
+  setTimeout(() => {
+    go.disabled = false;
+    go.textContent = 'Generate note';
+    proc.classList.remove('on');
+    document.querySelectorAll('.seg').forEach(s => s.classList.remove('fill'));
+    showNote(chosenType);
+  }, 400 + steps.length * 1150 + 350);
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  document.getElementById('noteView').classList.remove('on');
+  document.getElementById('genView').style.display = '';
+  scrollTo(0, 0);
+});
+
+function showNote(type){
+  const { title, html } = NOTES[type]();
+  document.getElementById('navTitle').textContent = title;
+  document.getElementById('notePage').innerHTML = html +
+    `<details class="src"><summary>Source ▼</summary><pre>${SAMPLES[sample].text.replace(/</g,'&lt;')}</pre></details>
+     <div class="nfoot">Generated by Notes · ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>`;
+  document.getElementById('genView').style.display = 'none';
+  document.getElementById('noteView').classList.add('on');
+  scrollTo(0, 0);
+  wireSort();
+}
+
+function wireSort(){
+  document.querySelectorAll('#notePage th').forEach(th => {
+    th.addEventListener('click', () => {
+      const table = th.closest('table');
+      const idx = [...th.parentNode.children].indexOf(th);
+      const rows = [...table.querySelectorAll('tbody tr')];
+      const dir = th.dataset.dir === 'asc' ? -1 : 1;
+      th.dataset.dir = dir === 1 ? 'asc' : 'desc';
+      rows.sort((a, b) => dir * a.children[idx].textContent.localeCompare(b.children[idx].textContent, undefined, { numeric: true }));
+      rows.forEach(r => table.querySelector('tbody').append(r));
+      table.querySelectorAll('th').forEach(h => { if (h !== th) delete h.dataset.dir; h.textContent = h.textContent.replace(/ [↑↓]$/, ''); });
+      th.textContent = th.textContent.replace(/ [↑↓]$/, '') + (dir === 1 ? ' ↑' : ' ↓');
+    });
+  });
+}
+
+const scoreBadge = n =>
+  `<span class="badge" style="background:${n >= 70 ? '#dcfce7;color:#15803d' : n >= 40 ? '#fef3c7;color:#92400e' : '#f3f4f6;color:#6b7280'}">${n}</span>`;
+
+const NOTES = [
+  () => ({
+    title: 'Meadowline · quarterly account call',
+    html: `
+    <div class="card" style="border-top:4px solid #0d9488;background:#f0fdfa">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <h1>Meadowline · quarterly account call</h1>
+        <span class="badge" style="background:#fef3c7;color:#92400e">Warm</span>
+      </div>
+      <p style="margin:8px 0 10px">The relationship is steady and engagement is genuinely strong, but delivery quality dipped after the March courier switch and the Q4 renewal has not been raised yet.</p>
+      <ul class="plain">
+        <li>Chase legal on the referral T&amp;Cs before Friday or it slips the launch email</li>
+        <li>Win-back voucher campaign to be set up Wednesday</li>
+        <li>Draft a trade programme pilot proposal: clear expansion signal</li>
+      </ul>
+      <details class="score-details"><summary>Health score: 64/100</summary>
+        <table style="margin-top:10px"><thead><tr><th>Pillar</th><th>Score</th><th>Evidence</th></tr></thead><tbody>
+          <tr><td>Engagement</td><td>${scoreBadge(72)}</td><td>Three users in weekly; garden range project completed with 34% opt-in and 81% completion</td></tr>
+          <tr><td>Delivery quality</td><td>${scoreBadge(58)}</td><td>Courier complaints in March; response rates recovered to 81% by April</td></tr>
+          <tr><td>Growth &amp; risk</td><td>${scoreBadge(55)}</td><td>Trade programme interest is live, but Q4 renewal terms not yet discussed</td></tr>
+          <tr><td><b>Health score</b></td><td>${scoreBadge(64)}</td><td>0.40 × Engagement + 0.35 × Delivery quality + 0.25 × Growth &amp; risk</td></tr>
+        </tbody></table>
+      </details>
+    </div>
+
+    <h2>Attendees</h2>
+    <div class="chips-row"><span class="pchip">Priya · Meadowline</span><span class="pchip">Jo · Meadowline</span><span class="pchip">Jack</span></div>
+
+    <h2>Actions</h2>
+    <table><thead><tr><th class="num">#</th><th>Action</th><th>Owner</th><th>Deadline</th><th>Priority</th></tr></thead><tbody>
+      <tr><td class="num">1</td><td>Chase legal for referral T&amp;Cs sign-off</td><td>Priya</td><td>Friday</td><td><span class="cell-hi">High</span></td></tr>
+      <tr><td class="num">2</td><td>Set up win-back voucher campaign</td><td>Jack</td><td>Wednesday</td><td><span class="cell-med">Medium</span></td></tr>
+      <tr><td class="num">3</td><td>Draft trade programme pilot proposal</td><td>Jack</td><td>next week</td><td><span class="cell-med">Medium</span></td></tr>
+      <tr><td class="num">4</td><td>Book renewal conversation for early Q4</td><td>Jack</td><td>this month</td><td><span class="cell-low">Low</span></td></tr>
+    </tbody></table>
+
+    <h2>Decisions</h2>
+    <table><thead><tr><th class="num">#</th><th>Decision</th><th>Rationale</th><th>Owner</th></tr></thead><tbody>
+      <tr><td class="num">1</td><td>Trade programme gets a scoped pilot, not an ad-hoc yes</td><td>Repeated inbound requests deserve a proper test with success criteria</td><td>Jack</td></tr>
+      <tr><td class="num">2</td><td>Referral launch email holds for legal until Friday only</td><td>Launch timing matters more than one channel</td><td>Priya</td></tr>
+    </tbody></table>
+
+    <h2>Expansion Signals</h2>
+    <table><thead><tr><th class="num">#</th><th>Signal</th><th>Detail</th><th>Owner</th></tr></thead><tbody>
+      <tr><td class="num">1</td><td>Trade programme demand</td><td>Customers keep asking Meadowline about trade; pilot proposal in flight</td><td>Jack</td></tr>
+    </tbody></table>
+
+    <h2>Risks &amp; Blockers</h2>
+    <ul class="plain">
+      <li>Q4 renewal terms unconfirmed <span class="pchip">Jack</span> <span class="cell-med">Medium</span></li>
+      <li>Legal sign-off could slip the referral launch <span class="pchip">Priya</span> <span class="cell-med">Medium</span></li>
+    </ul>
+
+    <h2>Open Questions</h2>
+    <ul class="plain">
+      <li>What does success look like for a trade pilot? <span class="pchip">Jack</span></li>
+      <li>Is the courier issue fully resolved or seasonal? <span class="pchip">Jo</span></li>
+    </ul>`
+  }),
+
+  () => ({
+    title: 'Checkout outage · P2 · 41 minutes',
+    html: `
+    <div class="card" style="background:#fff7ed;border:1px solid #fed7aa">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="badge" style="background:#f97316;color:#fff">P2</span>
+        <span class="badge" style="background:#fff;border:1px solid #fed7aa;color:#9a3412">Duration: 41 min</span>
+      </div>
+      <h1 style="margin-top:8px">Checkout outage</h1>
+      <p>Checkout returned 502s for 41 minutes during peak evening trade after a migration locked the orders table.</p>
+    </div>
+
+    <h2>Timeline</h2>
+    <table><thead><tr><th class="num">#</th><th>Time</th><th>Event</th><th>Who</th></tr></thead><tbody>
+      <tr style="background:#fef3c7"><td class="num">1</td><td>19:41</td><td>502 spike detected in the error channel</td><td>Sam</td></tr>
+      <tr><td class="num">2</td><td>19:43</td><td>Orders API confirmed timing out</td><td>Jack</td></tr>
+      <tr><td class="num">3</td><td>19:47</td><td>Cause identified: migration 0231 indexing orders without CONCURRENTLY</td><td>Jack</td></tr>
+      <tr><td class="num">4</td><td>19:52</td><td>Migration killed; lock queue draining</td><td>Jack</td></tr>
+      <tr><td class="num">5</td><td>20:05</td><td>Checkouts recovering; error rate under 1%</td><td>Sam</td></tr>
+      <tr style="background:#dcfce7"><td class="num">6</td><td>20:22</td><td>Fully recovered</td><td>Jack</td></tr>
+    </tbody></table>
+
+    <h2>Impact</h2>
+    <ul class="plain">
+      <li><b>214</b> failed checkouts during the window</li>
+      <li>Roughly <b>£3,100</b> of deferred revenue (most customers returned)</li>
+      <li><b>12</b> support tickets raised</li>
+    </ul>
+
+    <h2>Root Cause</h2>
+    <div class="card" style="background:#fef2f2;border-color:#fecaca">
+      Migration 0231 added an index to the orders table without <code>CONCURRENTLY</code>, taking an exclusive lock during peak trade. The lock queue backed up until the orders API exhausted its connection pool.
+    </div>
+
+    <h2>Resolution</h2>
+    <p>The migration was killed at 19:52 and locks drained naturally. Service was fully restored by 20:22. The index was re-created off-peak with <code>CONCURRENTLY</code> the following morning.</p>
+
+    <h2>Action Items</h2>
+    <table><thead><tr><th class="num">#</th><th>Action</th><th>Owner</th><th>Due Date</th><th>Priority</th></tr></thead><tbody>
+      <tr><td class="num">1</td><td>Add CONCURRENTLY check to migration lint</td><td>Jack</td><td>this week</td><td><span class="cell-hi">High</span></td></tr>
+      <tr><td class="num">2</td><td>Define an off-peak migration window</td><td>Sam</td><td>this week</td><td><span class="cell-hi">High</span></td></tr>
+      <tr><td class="num">3</td><td>Alert on lock queue depth, not just error rate</td><td>Jack</td><td>next sprint</td><td><span class="cell-med">Medium</span></td></tr>
+      <tr><td class="num">4</td><td>Write the migration checklist</td><td>Sam</td><td>next sprint</td><td><span class="cell-med">Medium</span></td></tr>
+    </tbody></table>
+
+    <h2>Lessons Learned</h2>
+    <div style="display:grid;gap:8px">
+      <div class="card" style="border-left:4px solid #dc2626">Detection came from a human watching a channel. The system should have paged first.</div>
+      <div class="card" style="border-left:4px solid #f59e0b">The migration was safe in staging because staging has no peak. Load matters.</div>
+      <div class="card" style="border-left:4px solid #16a34a">Time to identify was six minutes. Runbooks and calm channels work.</div>
+    </div>`
+  }),
+
+  () => {
+    const themes = [
+      { name: 'Retail moments', n: 6, colour: '#0d9488' },
+      { name: 'Community', n: 5, colour: '#8b5cf6' },
+      { name: 'Content', n: 4, colour: '#f59e0b' },
+      { name: 'Partnerships', n: 3, colour: '#3b82f6' },
+    ];
+    const total = themes.reduce((a, t) => a + t.n, 0);
+    let acc = 0;
+    const C = 2 * Math.PI * 42;
+    const segs = themes.map(t => {
+      const frac = t.n / total;
+      const s = `<circle r="42" cx="60" cy="60" fill="none" stroke="${t.colour}" stroke-width="18"
+        stroke-dasharray="${(frac * C).toFixed(1)} ${(C - frac * C).toFixed(1)}"
+        stroke-dashoffset="${(-acc * C).toFixed(1)}" transform="rotate(-90 60 60)"/>`;
+      acc += frac;
+      return s;
+    }).join('');
+    const stick = (colour, text, rot) =>
+      `<div class="sticky-note" style="background:${colour};transform:rotate(${rot}deg)">${text}</div>`;
+    return {
+      title: 'Spring campaign · brainstorm',
+      html: `
+      <div style="background:#f3f4f6;border-radius:14px;padding:20px">
+        <h1>Spring campaign · brainstorm</h1>
+        <p style="margin:4px 0 14px;color:#6b7280">18 ideas across four themes, 45 minutes, whole team.</p>
+        <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">${segs}<text x="60" y="64" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">18</text></svg>
+          <div>${themes.map(t => `<div style="font-size:12.5px;padding:2px 0"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${t.colour};margin-right:8px"></span>${t.name} · <b>${t.n}</b></div>`).join('')}</div>
+        </div>
+      </div>
+
+      <h2 class="eyebrow" style="margin-top:26px;letter-spacing:.1em">Retail moments</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px">
+        ${stick('#fef08a','Mother’s day bundle',-1.5)}${stick('#fef08a','Easter table setting kit',1)}${stick('#fed7aa','"Spring reset" edit',-1)}
+        ${stick('#fef08a','Garden range relaunch',2)}${stick('#fed7aa','Market stall pop-up',-2)}${stick('#fef08a','Sunday-evening drop',1.5)}
+      </div>
+      <h2 class="eyebrow" style="margin-top:22px;letter-spacing:.1em">Community</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px">
+        ${stick('#e9d5ff','Referral doubles month',1)}${stick('#e9d5ff','Review-for-voucher push',-1.5)}${stick('#fbcfe8','Top-100 early access',2)}
+        ${stick('#e9d5ff','Postcard in every parcel',-1)}${stick('#fbcfe8','Birthday surprises',1.5)}
+      </div>
+      <h2 class="eyebrow" style="margin-top:22px;letter-spacing:.1em">Content</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px">
+        ${stick('#fed7aa','Behind the scenes at the pottery',-2)}${stick('#fed7aa','Care guide series',1)}${stick('#fef08a','Founder Q&A',-1)}${stick('#fed7aa','Customer homes photo series',2)}
+      </div>
+      <h2 class="eyebrow" style="margin-top:22px;letter-spacing:.1em">Partnerships</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px">
+        ${stick('#bfdbfe','Florist cross-promo',1.5)}${stick('#bbf7d0','Coffee roaster gift box',-1)}${stick('#bfdbfe','Interiors newsletter swap',1)}
+      </div>
+
+      <h2>Next Steps</h2>
+      <ul class="plain">
+        <li>Pick two retail moments to commit to <span class="pchip">team vote</span></li>
+        <li>Cost the market stall pop-up <span class="pchip">Jo</span></li>
+        <li>Brief the photographer for customer homes <span class="pchip">Sam</span></li>
+      </ul>`
+    };
+  }
+];
+</script>
+</body>
+</html>

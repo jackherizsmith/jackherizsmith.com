@@ -126,9 +126,9 @@ function inspectorSelect(el: HTMLElement | null): void {
   if (!el) {
     selName.textContent = 'Nothing selected';
     youStatus.textContent = 'have the good cursor';
-    for (const f of ['#fX', '#fY', '#fW', '#fH', '#fR']) qs(f).textContent = '—';
-    qs('#tFont').textContent = '—';
-    qs('#tSize').textContent = '—';
+    for (const f of ['#fX', '#fY', '#fW', '#fH', '#fR']) qs(f).textContent = '·';
+    qs('#tFont').textContent = '·';
+    qs('#tSize').textContent = '·';
     fillInput.disabled = true;
     return;
   }

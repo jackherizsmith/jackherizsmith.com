@@ -1,6 +1,6 @@
 import * as store from './store';
 import * as editor from './editor';
-import { markJackLayer } from './chrome';
+import { markJackLayer, toast } from './chrome';
 
 interface PlanStep {
   id: string;
@@ -35,6 +35,15 @@ let cursor: HTMLElement;
 let bubble: HTMLElement;
 let flashBox: HTMLElement;
 let statusEl: HTMLElement;
+let canvasEl: HTMLElement;
+let followBtn: HTMLElement;
+let following = false;
+
+function setFollow(on: boolean): void {
+  following = on;
+  followBtn.classList.toggle('following', on);
+  toast(on ? 'Following Jack. Scroll or press Esc to stop.' : 'Stopped following Jack.');
+}
 
 let jx = 900, jy = 640, tx = 900, ty = 640;
 let action: Action | null = null;
@@ -157,6 +166,10 @@ function tick(now: number): void {
   jx += (dx / dist) * step;
   jy += (dy / dist) * step;
   cursor.style.transform = `translate(${jx}px, ${jy}px)`;
+  if (following) {
+    canvasEl.scrollLeft = jx - canvasEl.clientWidth / 2;
+    canvasEl.scrollTop = jy - canvasEl.clientHeight / 2;
+  }
 }
 
 export function initJack(): void {
@@ -164,12 +177,22 @@ export function initJack(): void {
   bubble = qs('#jackBubble');
   flashBox = qs('#jackSel');
   statusEl = qs('#jackStatus');
+  canvasEl = qs('#canvas');
+  followBtn = qs('#followJack');
   cursor.style.transform = `translate(${jx}px, ${jy}px)`;
 
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     setStatus('here, quietly');
     return;
   }
+
+  followBtn.addEventListener('click', () => setFollow(!following));
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && following) setFollow(false);
+  });
+  canvasEl.addEventListener('wheel', () => {
+    if (following) setFollow(false);
+  }, { passive: true });
 
   editor.onSelect(userSelected);
 
