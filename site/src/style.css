@@ -456,7 +456,7 @@ body.interacting iframe{pointer-events:none}
 
   /* Hero parallax layer */
   .m-fx{position:absolute;top:0;left:0;right:0;height:300px;overflow:hidden;pointer-events:none;z-index:0;border-radius:2px 2px 0 0}
-  .m-blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:.6;will-change:transform;background:var(--m-accent,#0d99ff)}
+  .m-blob{position:absolute;border-radius:50%;filter:blur(36px);opacity:.72;will-change:transform;background:var(--m-accent,#0d99ff)}
   .artboard>.kicker,.artboard>h1,.artboard>.intro,.artboard>.actions{position:relative;z-index:1}
   @media (prefers-reduced-motion:reduce){.m-blob{display:none}}
 

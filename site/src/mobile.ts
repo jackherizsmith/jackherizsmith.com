@@ -132,6 +132,7 @@ interface DOEStatic { requestPermission?: () => Promise<OrientationPerm> }
 let tiltOn = false;
 let blobs: HTMLElement[] = [];
 let hero: HTMLElement | null = null;
+let baseG: number | null = null, baseB: number | null = null, gotEvent = false;
 let targetX = 0, targetY = 0, curX = 0, curY = 0, rafPending = false;
 
 function buildHeroFx(): void {
@@ -164,10 +165,10 @@ function tiltFrame(): void {
   curX += (targetX - curX) * 0.12;
   curY += (targetY - curY) * 0.12;
   blobs.forEach((b, i) => {
-    const depth = (i + 1) * 18;
-    b.style.transform = `translate(${curX * depth}px, ${curY * depth}px)`;
+    const depth = (i + 1) * 24;
+    b.style.transform = `translate(${curX * depth}px, ${curY * depth}px) scale(1.15)`;
   });
-  if (hero) hero.style.transform = `translate(${curX * -10}px, ${curY * -7}px)`;
+  if (hero) hero.style.transform = `translate(${curX * -16}px, ${curY * -10}px)`;
   if (Math.abs(targetX - curX) > 0.02 || Math.abs(targetY - curY) > 0.02) schedule();
 }
 
@@ -178,10 +179,14 @@ function schedule(): void {
 }
 
 function onOrient(e: DeviceOrientationEvent): void {
-  const g = e.gamma ?? 0;
-  const b = e.beta ?? 0;
-  targetX = Math.max(-1, Math.min(1, g / 30));
-  targetY = Math.max(-1, Math.min(1, (b - 45) / 30));
+  const g = e.gamma, b = e.beta;
+  if (g === null || b === null) return;
+  gotEvent = true;
+  // Recentre on the first reading: however the phone is held becomes neutral,
+  // and we react to movement from there (24 degrees of tilt = full effect).
+  if (baseG === null) { baseG = g; baseB = b; }
+  targetX = Math.max(-1, Math.min(1, (g - baseG) / 24));
+  targetY = Math.max(-1, Math.min(1, (b - (baseB ?? b)) / 24));
   schedule();
 }
 
@@ -201,9 +206,14 @@ function enableTilt(): void {
   const DOE = (window.DeviceOrientationEvent ?? undefined) as unknown as DOEStatic | undefined;
   const start = (): void => {
     tiltOn = true;
+    gotEvent = false;
+    baseG = baseB = null;
     window.addEventListener('deviceorientation', onOrient);
     btn?.classList.add('on');
-    toast('Tilt your phone to explore.');
+    toast('Tilt your phone. The shapes behind the intro will drift.');
+    window.setTimeout(() => {
+      if (tiltOn && !gotEvent) toast('This device isn’t sending motion data, so tilt has nothing to work with.');
+    }, 1600);
   };
   if (DOE && typeof DOE.requestPermission === 'function') {
     DOE.requestPermission().then(res => {
