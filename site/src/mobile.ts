@@ -101,9 +101,7 @@ function buildBar(): void {
     <span class="m-swatches">${swatches}</span>
     <button class="m-btn" id="mFont">Editorial</button>
     <button class="m-btn" id="mShuffle">Shuffle</button>
-    <span class="grow"></span>
-    <button class="m-btn" id="mTilt">Tilt</button>
-    <button class="m-btn" id="mShare">Share</button>`;
+    <button class="m-btn" id="mTilt">Tilt</button>`;
   document.body.append(bar);
 
   bar.querySelectorAll<HTMLElement>('.m-swatch').forEach(s =>
@@ -114,13 +112,6 @@ function buildBar(): void {
     state.font = Math.floor(Math.random() * FONTS.length);
     applyStyle();
   });
-  qs('#mShare')!.addEventListener('click', () => {
-    const url = `${location.origin}${location.pathname}#m=${state.theme}.${state.font}`;
-    navigator.clipboard.writeText(url).then(
-      () => toast('Link copied. Your styling travels with it.'),
-      () => window.prompt('Copy your link:', url),
-    );
-  });
   qs('#mTilt')!.addEventListener('click', enableTilt);
 }
 
@@ -130,8 +121,7 @@ type OrientationPerm = 'granted' | 'denied' | 'default';
 interface DOEStatic { requestPermission?: () => Promise<OrientationPerm> }
 
 let tiltOn = false;
-let blobs: HTMLElement[] = [];
-let hero: HTMLElement | null = null;
+let stage: HTMLElement | null = null;
 let baseG: number | null = null, baseB: number | null = null, gotEvent = false;
 let targetX = 0, targetY = 0, curX = 0, curY = 0, rafPending = false;
 
@@ -142,9 +132,9 @@ function buildHeroFx(): void {
   fx.className = 'm-fx';
   fx.setAttribute('aria-hidden', 'true');
   const specs = [
-    { s: 200, l: '-40px', t: '-30px', o: 0.5 },
-    { s: 150, l: '58%', t: '20px', o: 0.4 },
-    { s: 120, l: '30%', t: '150px', o: 0.3 },
+    { s: 200, l: '-40px', t: '-30px', o: 0.7 },
+    { s: 150, l: '58%', t: '20px', o: 0.6 },
+    { s: 120, l: '30%', t: '150px', o: 0.5 },
   ];
   specs.forEach(sp => {
     const b = document.createElement('div');
@@ -156,19 +146,28 @@ function buildHeroFx(): void {
     fx.append(b);
   });
   art.prepend(fx);
-  blobs = [...fx.querySelectorAll<HTMLElement>('.m-blob')];
-  hero = qs('#heading');
+  stage = art;
+}
+
+function updateOrigins(): void {
+  if (!stage) return;
+  const mid = window.scrollY + window.innerHeight / 2;
+  if (stage.parentElement) stage.parentElement.style.perspectiveOrigin = `50% ${mid}px`;
+  stage.style.transformOrigin = `50% ${mid - stage.offsetTop}px`;
 }
 
 function tiltFrame(): void {
   rafPending = false;
   curX += (targetX - curX) * 0.12;
   curY += (targetY - curY) * 0.12;
-  blobs.forEach((b, i) => {
-    const depth = (i + 1) * 24;
-    b.style.transform = `translate(${curX * depth}px, ${curY * depth}px) scale(1.15)`;
-  });
-  if (hero) hero.style.transform = `translate(${curX * -16}px, ${curY * -10}px)`;
+  if (stage) {
+    // --tz ramps the per-layer depth in with the tilt, so the page is flat at
+    // rest and the blocks lift off as you angle the phone. The rotation is what
+    // makes that raised depth read as 3D.
+    const mag = Math.min(1, Math.hypot(curX, curY));
+    stage.style.setProperty('--tz', mag.toFixed(3));
+    stage.style.transform = `rotateX(${(curY * -13).toFixed(2)}deg) rotateY(${(curX * 13).toFixed(2)}deg)`;
+  }
   if (Math.abs(targetX - curX) > 0.02 || Math.abs(targetY - curY) > 0.02) schedule();
 }
 
@@ -190,6 +189,10 @@ function onOrient(e: DeviceOrientationEvent): void {
   schedule();
 }
 
+function onScroll(): void {
+  if (tiltOn) updateOrigins();
+}
+
 function enableTilt(): void {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     toast('Tilt is off while reduced motion is on.');
@@ -199,7 +202,16 @@ function enableTilt(): void {
   if (tiltOn) {
     tiltOn = false;
     window.removeEventListener('deviceorientation', onOrient);
-    targetX = targetY = 0; schedule();
+    window.removeEventListener('scroll', onScroll);
+    targetX = targetY = curX = curY = 0;
+    if (stage) {
+      stage.style.transform = '';
+      stage.style.transformOrigin = '';
+      stage.style.setProperty('--tz', '0');
+      stage.classList.remove('tilt3d');
+      const p = stage.parentElement;
+      if (p) { p.classList.remove('tilt3d'); p.style.perspectiveOrigin = ''; }
+    }
     btn?.classList.remove('on');
     return;
   }
@@ -208,9 +220,13 @@ function enableTilt(): void {
     tiltOn = true;
     gotEvent = false;
     baseG = baseB = null;
+    stage?.classList.add('tilt3d');
+    stage?.parentElement?.classList.add('tilt3d');
+    updateOrigins();
     window.addEventListener('deviceorientation', onOrient);
+    window.addEventListener('scroll', onScroll, { passive: true });
     btn?.classList.add('on');
-    toast('Tilt your phone. The shapes behind the intro will drift.');
+    toast('Tilt your phone. The page lifts into 3D from wherever you’re holding it.');
     window.setTimeout(() => {
       if (tiltOn && !gotEvent) toast('This device isn’t sending motion data, so tilt has nothing to work with.');
     }, 1600);

@@ -145,7 +145,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   background:#fdf3d7;border-radius:4px;padding:2px 6px;vertical-align:2px;white-space:nowrap;
 }
 .work .desc{color:#5a6067;font-size:13.5px;line-height:1.55}
-.disclosure{max-width:520px;font-size:13px;line-height:1.6;font-style:italic;color:#8a9099;margin:20px 0 0}
+.disclosure{max-width:520px;font-size:13px;line-height:1.6;font-style:italic;color:#8a9099;margin:20px 0 48px}
 .contact{display:flex;align-items:center;gap:16px;border-top:1px solid #eceef1;padding-top:24px;margin-top:44px;font-size:14px;color:#3c4147}
 .contact .links{margin-left:auto;display:flex;gap:14px;font-size:13px}
 .contact .links a{color:#5a6067;text-decoration-color:#c3c9d0;text-underline-offset:3px}
@@ -468,18 +468,16 @@ body.interacting iframe{pointer-events:none}
   .m-swipehint{font-size:11px;color:var(--m-body,#8a9099);opacity:.8;margin:0 0 8px;display:flex;gap:6px;align-items:center}
 
   /* Restyle bar */
-  .m-bar{position:fixed;left:0;right:0;bottom:0;z-index:120;display:flex;align-items:center;gap:10px;
-    padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--m-surface,#fff);
-    border-top:1px solid var(--m-line,#e6e8ec);box-shadow:0 -6px 20px rgba(20,30,40,.08);overflow-x:auto;scrollbar-width:none}
-  .m-bar::-webkit-scrollbar{display:none}
-  .m-swatches{display:flex;gap:8px;flex:none}
+  .m-bar{position:fixed;left:0;right:0;bottom:0;z-index:120;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px 10px;
+    padding:11px 14px calc(11px + env(safe-area-inset-bottom));background:var(--m-surface,#fff);
+    border-top:1px solid var(--m-line,#e6e8ec);box-shadow:0 -6px 20px rgba(20,30,40,.08)}
+  .m-swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;flex-basis:100%}
   .m-swatch{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--m-line,#ddd);flex:none}
   .m-swatch.on{box-shadow:0 0 0 2px var(--m-surface,#fff),0 0 0 4px var(--m-ink,#333)}
   .m-btn{flex:none;font:inherit;font-size:12.5px;font-weight:700;color:var(--m-ink,#17191c);background:transparent;
     border:1px solid var(--m-line,#e6e8ec);border-radius:99px;padding:7px 12px;white-space:nowrap}
   .m-btn.on{background:var(--m-accent);color:var(--m-onaccent);border-color:transparent}
-  .m-bar .grow{flex:1;min-width:4px}
-  .canvas-inner{padding-bottom:120px}
+  .canvas-inner{padding-bottom:150px}
   .mobile-note{background:var(--m-surface,#f2f4f7);border:1px solid var(--m-line,#e6e8ec);color:var(--m-body,#5a6067)}
 
   /* Full-screen demo viewer: a horizontal swipe pager of the demos */
@@ -503,4 +501,25 @@ body.interacting iframe{pointer-events:none}
   .m-dots{display:flex;gap:7px}
   .m-dots i{width:7px;height:7px;border-radius:50%;background:var(--m-line,#ccc);transition:background .2s}
   .m-dots i.on{background:var(--m-accent,#0d99ff)}
+}
+
+/* ══ Mobile: hide the Jack line, and the full-page 3D tilt ═══════════════════ */
+@media (max-width:900px){
+  .jack-only{display:none}
+
+  /* Applied only while Tilt is on (mobile.ts toggles .tilt3d). Each direct
+     child of the artboard becomes a depth layer; --tz ramps the depth in with
+     the tilt so the page is flat at rest and the blocks lift as you angle it. */
+  .canvas-inner.tilt3d{perspective:1500px}
+  .artboard.tilt3d{transform-style:preserve-3d;will-change:transform}
+  .artboard.tilt3d > *{transform:translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
+  .artboard.tilt3d > .m-fx{--z:-70}
+  .artboard.tilt3d > .kicker{--z:42}
+  .artboard.tilt3d > h1{--z:86}
+  .artboard.tilt3d > .intro{--z:56}
+  .artboard.tilt3d > .actions{--z:66}
+  .artboard.tilt3d > h2,.artboard.tilt3d > .work-sub{--z:58}
+  .artboard.tilt3d > .work{--z:40}
+  .artboard.tilt3d > .disclosure{--z:32}
+  .artboard.tilt3d > .contact{--z:26}
 }
