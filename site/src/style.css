@@ -12,7 +12,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .hand{font-family:"Chalkboard SE",Chalkboard,"Comic Sans MS",cursive}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
 :focus-visible{outline:2px solid var(--select);outline-offset:2px}
 
 /* ── Toolbar ─────────────────────────────── */
@@ -439,7 +439,8 @@ body.interacting iframe{pointer-events:none}
 
   /* Themeable document (vars set by mobile.ts; desktop never reads them) */
   body{background:var(--m-bg,var(--canvas));font-family:var(--m-body-font,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif);transition:background .35s}
-  .artboard h1{font-family:var(--m-display,ui-serif,"New York",Georgia,serif);letter-spacing:var(--m-display-ls,-.015em);font-weight:var(--m-display-wt,600);color:var(--m-ink,#17191c);font-size:40px}
+  .artboard h1,.artboard h2,.artboard .work-sub{font-family:var(--m-display,ui-serif,"New York",Georgia,serif);letter-spacing:var(--m-display-ls,-.015em)}
+  .artboard h1{font-weight:var(--m-display-wt,600);color:var(--m-ink,#17191c);font-size:40px}
   .artboard h2,.artboard h3:not(.work-sub),.work .name{color:var(--m-ink,#17191c)}
   .intro,.work .desc,.contact,.disclosure{color:var(--m-body,#5a6067)}
   .kicker,.work-sub{color:var(--m-accent,#8a9099)}
@@ -464,13 +465,13 @@ body.interacting iframe{pointer-events:none}
   /* Demo carousel (tools section) */
   .m-carousel{display:flex;flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .m-carousel::-webkit-scrollbar{display:none}
-  .m-carousel .item{min-width:84%;scroll-snap-align:center;display:block;cursor:pointer}
+  .m-carousel .item{min-width:84%;scroll-snap-align:center;display:block;cursor:pointer;touch-action:manipulation}
   .m-carousel .item .play{display:inline-block;margin-top:8px;background:var(--m-accent,#0d99ff);color:var(--m-onaccent,#fff);padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700}
   .m-swipehint{font-size:11px;color:var(--m-body,#8a9099);opacity:.8;margin:0 0 8px;display:flex;gap:6px;align-items:center}
 
   /* Restyle bar */
   .m-bar{position:fixed;left:0;right:0;bottom:0;z-index:120;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px 10px;
-    padding:11px 14px calc(11px + env(safe-area-inset-bottom));background:var(--m-surface,#fff);
+    padding:11px 14px calc(11px + env(safe-area-inset-bottom));background:var(--m-surface,#fff);touch-action:manipulation;
     border-top:1px solid var(--m-line,#e6e8ec);box-shadow:0 -6px 20px rgba(20,30,40,.08)}
   .m-swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;flex-basis:100%}
   .m-swatch{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--m-line,#ddd);flex:none}
@@ -511,8 +512,8 @@ body.interacting iframe{pointer-events:none}
   /* Applied only while Tilt is on (mobile.ts toggles .tilt3d). Each direct
      child of the artboard becomes a depth layer; --tz ramps the depth in with
      the tilt so the page is flat at rest and the blocks lift as you angle it. */
-  .canvas-inner.tilt3d{perspective:1300px}
-  .artboard.tilt3d{transform-style:preserve-3d;will-change:transform}
-  /* --z per layer is assigned in document order by mobile.ts (top = nearest) */
-  .artboard.tilt3d > *{transform:translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
+  /* Each block gets its own perspective and tilts about its own centre, so the
+     effect stays stable while the page scrolls. --z (assigned in document order
+     by mobile.ts, top = nearest) ramps in via --tz to lift the layers apart. */
+  .artboard.tilt3d > *{will-change:transform;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
 }

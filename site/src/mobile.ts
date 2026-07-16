@@ -19,10 +19,13 @@ const THEMES: Theme[] = [
   { bg: '#0f0f10', surface: '#1a1a1c', ink: '#fafafa', body: '#b0b0b4', accent: '#e5e5e5', onaccent: '#111111', line: '#2a2a2e' },
 ];
 
+// Font pairings chosen by vibe, not name: a title face + a complementary body
+// face, applied across every heading and all body text.
 const FONTS: Font[] = [
-  { name: 'Editorial', display: `ui-serif,"New York",Georgia,serif`, body: SANS, ls: '-.015em', wt: '600' },
-  { name: 'Grotesk', display: `"Avenir Next",${SANS}`, body: SANS, ls: '-.03em', wt: '800' },
-  { name: 'Mono', display: `ui-monospace,"SF Mono",Menlo,monospace`, body: SANS, ls: '-.02em', wt: '700' },
+  { name: 'Editorial', display: `ui-serif,"New York",Georgia,serif`, body: `"Avenir Next",${SANS}`, ls: '-.02em', wt: '600' },
+  { name: 'Professional', display: `Georgia,"Times New Roman",Times,serif`, body: `"Helvetica Neue",Helvetica,Arial,sans-serif`, ls: '-.01em', wt: '700' },
+  { name: 'Casual', display: `"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif`, body: `"Trebuchet MS","Segoe UI",Verdana,sans-serif`, ls: '0', wt: '600' },
+  { name: 'Developer', display: `ui-monospace,"SF Mono",Menlo,monospace`, body: SANS, ls: '-.03em', wt: '700' },
 ];
 
 const DEMOS = [
@@ -156,16 +159,9 @@ function setupDepthLayers(): void {
   if (!stage) return;
   const kids = ([...stage.children] as HTMLElement[])
     .filter(el => el.id !== 'emptyState' && !el.classList.contains('m-fx'));
-  const base = 96, step = 12;
+  const base = 78, step = 9;
   kids.forEach((el, i) => el.style.setProperty('--z', String(base - i * step)));
-  stage.querySelector<HTMLElement>('.m-fx')?.style.setProperty('--z', '-140');
-}
-
-function updateOrigins(): void {
-  if (!stage) return;
-  const mid = window.scrollY + window.innerHeight / 2;
-  if (stage.parentElement) stage.parentElement.style.perspectiveOrigin = `50% ${mid}px`;
-  stage.style.transformOrigin = `50% ${mid - stage.offsetTop}px`;
+  stage.querySelector<HTMLElement>('.m-fx')?.style.setProperty('--z', '-120');
 }
 
 function tiltFrame(): void {
@@ -173,12 +169,14 @@ function tiltFrame(): void {
   curX += (targetX - curX) * 0.12;
   curY += (targetY - curY) * 0.12;
   if (stage) {
-    // --tz ramps the per-layer depth in with the tilt, so the page is flat at
-    // rest and the blocks lift off as you angle the phone. The rotation is what
-    // makes that raised depth read as 3D.
+    // Each block carries its own perspective and tilts about its own centre
+    // (see CSS), so this stays stable while the page scrolls — no giant
+    // rotating element, no scroll-synced origin. --tz ramps depth in from flat;
+    // higher --z blocks pop nearer, so each sits above the one beneath it.
     const mag = Math.min(1, Math.hypot(curX, curY));
     stage.style.setProperty('--tz', mag.toFixed(3));
-    stage.style.transform = `rotateX(${(curY * -15).toFixed(2)}deg) rotateY(${(curX * 15).toFixed(2)}deg)`;
+    stage.style.setProperty('--rx', `${(curY * -16).toFixed(2)}deg`);
+    stage.style.setProperty('--ry', `${(curX * 16).toFixed(2)}deg`);
   }
   if (Math.abs(targetX - curX) > 0.02 || Math.abs(targetY - curY) > 0.02) schedule();
 }
@@ -201,10 +199,6 @@ function onOrient(e: DeviceOrientationEvent): void {
   schedule();
 }
 
-function onScroll(): void {
-  if (tiltOn) updateOrigins();
-}
-
 function enableTilt(): void {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     toast('Tilt is off while reduced motion is on.');
@@ -214,15 +208,12 @@ function enableTilt(): void {
   if (tiltOn) {
     tiltOn = false;
     window.removeEventListener('deviceorientation', onOrient);
-    window.removeEventListener('scroll', onScroll);
     targetX = targetY = curX = curY = 0;
     if (stage) {
-      stage.style.transform = '';
-      stage.style.transformOrigin = '';
       stage.style.setProperty('--tz', '0');
+      stage.style.setProperty('--rx', '0deg');
+      stage.style.setProperty('--ry', '0deg');
       stage.classList.remove('tilt3d');
-      const p = stage.parentElement;
-      if (p) { p.classList.remove('tilt3d'); p.style.perspectiveOrigin = ''; }
     }
     btn?.classList.remove('on');
     return;
@@ -233,12 +224,9 @@ function enableTilt(): void {
     gotEvent = false;
     baseG = baseB = null;
     stage?.classList.add('tilt3d');
-    stage?.parentElement?.classList.add('tilt3d');
-    updateOrigins();
     window.addEventListener('deviceorientation', onOrient);
-    window.addEventListener('scroll', onScroll, { passive: true });
     btn?.classList.add('on');
-    toast('Tilt your phone. The page lifts into 3D from wherever you’re holding it.');
+    toast('Tilt your phone. Each layer lifts in 3D from wherever you’re holding it.');
     window.setTimeout(() => {
       if (tiltOn && !gotEvent) toast('This device isn’t sending motion data, so tilt has nothing to work with.');
     }, 1600);
