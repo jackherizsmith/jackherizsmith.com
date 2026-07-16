@@ -149,6 +149,18 @@ function buildHeroFx(): void {
   stage = art;
 }
 
+// The published mobile site is the desktop design's layer stack made physical:
+// each block sits higher than the one beneath it (top of the page nearest),
+// so tilting fans them into an exaggerated 3D staircase.
+function setupDepthLayers(): void {
+  if (!stage) return;
+  const kids = ([...stage.children] as HTMLElement[])
+    .filter(el => el.id !== 'emptyState' && !el.classList.contains('m-fx'));
+  const base = 96, step = 12;
+  kids.forEach((el, i) => el.style.setProperty('--z', String(base - i * step)));
+  stage.querySelector<HTMLElement>('.m-fx')?.style.setProperty('--z', '-140');
+}
+
 function updateOrigins(): void {
   if (!stage) return;
   const mid = window.scrollY + window.innerHeight / 2;
@@ -166,7 +178,7 @@ function tiltFrame(): void {
     // makes that raised depth read as 3D.
     const mag = Math.min(1, Math.hypot(curX, curY));
     stage.style.setProperty('--tz', mag.toFixed(3));
-    stage.style.transform = `rotateX(${(curY * -13).toFixed(2)}deg) rotateY(${(curX * 13).toFixed(2)}deg)`;
+    stage.style.transform = `rotateX(${(curY * -15).toFixed(2)}deg) rotateY(${(curX * 15).toFixed(2)}deg)`;
   }
   if (Math.abs(targetX - curX) > 0.02 || Math.abs(targetY - curY) > 0.02) schedule();
 }
@@ -364,6 +376,7 @@ function setupCarousel(): void {
 export function initMobile(): void {
   load();
   buildHeroFx();
+  setupDepthLayers();
   buildBar();
   buildViewer();
   setupCarousel();

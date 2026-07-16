@@ -74,6 +74,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .layer.hidden-node .eye{opacity:1}
 .layer.d1{padding-left:26px}
 .layer.d2{padding-left:40px}
+.layers-note{font-size:10.5px;line-height:1.55;color:var(--ink-2);padding:12px;margin-top:8px;border-top:1px solid var(--chrome-line)}
 
 /* inspector */
 .insp-section{border-bottom:1px solid var(--chrome-line);padding-bottom:12px}
@@ -510,16 +511,8 @@ body.interacting iframe{pointer-events:none}
   /* Applied only while Tilt is on (mobile.ts toggles .tilt3d). Each direct
      child of the artboard becomes a depth layer; --tz ramps the depth in with
      the tilt so the page is flat at rest and the blocks lift as you angle it. */
-  .canvas-inner.tilt3d{perspective:1500px}
+  .canvas-inner.tilt3d{perspective:1300px}
   .artboard.tilt3d{transform-style:preserve-3d;will-change:transform}
+  /* --z per layer is assigned in document order by mobile.ts (top = nearest) */
   .artboard.tilt3d > *{transform:translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
-  .artboard.tilt3d > .m-fx{--z:-70}
-  .artboard.tilt3d > .kicker{--z:42}
-  .artboard.tilt3d > h1{--z:86}
-  .artboard.tilt3d > .intro{--z:56}
-  .artboard.tilt3d > .actions{--z:66}
-  .artboard.tilt3d > h2,.artboard.tilt3d > .work-sub{--z:58}
-  .artboard.tilt3d > .work{--z:40}
-  .artboard.tilt3d > .disclosure{--z:32}
-  .artboard.tilt3d > .contact{--z:26}
 }
