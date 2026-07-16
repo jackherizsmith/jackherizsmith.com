@@ -66,6 +66,12 @@
   .rbar .grow{flex:1}
   .rbar .tool{font:inherit;font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px 11px;cursor:pointer;color:#4A5568}
   .rbar .tool:hover{background:#f7fafc}
+  .rbar .tool.tonotes{color:#0d7a70;border-color:#a7e0d8;background:#f0fdfa}
+  .rbar .tool.tonotes:hover{background:#dcf5f0}
+  .dtoast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);z-index:60;
+    background:#0d9488;color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:12px;
+    box-shadow:0 10px 30px rgba(13,148,136,.35);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+  .dtoast.on{opacity:1;transform:translateX(-50%) translateY(0)}
   .loadnote{font-size:11.5px;color:var(--muted)}
   table.res{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
   table.res th{
@@ -146,6 +152,7 @@
       <button class="tool" id="copysql">Copy SQL</button>
       <button class="tool" id="csv">Export CSV</button>
       <button class="tool" id="save">Save query</button>
+      <button class="tool tonotes" id="tonotes">Send to Notes ↗</button>
     </div>
     <div id="tablePane"></div>
     <div id="chartPane">
@@ -156,6 +163,7 @@
   </div>
 </div>
 <div id="tip"></div>
+<div id="dtoast" class="dtoast"></div>
 
 <script>
 const COLOURS = ['#3182CE','#E53E3E','#38A169','#D69E2E','#805AD5'];
@@ -381,7 +389,7 @@ el('tbtn').addEventListener('click', () => {
 el('cbtn').addEventListener('click', () => {
   st.view = 'chart';
   el('cbtn').classList.add('on'); el('tbtn').classList.remove('on');
-  el('tablePane').style.display = 'none'; el('chartPane').style.display = '';
+  el('tablePane').style.display = 'none'; el('chartPane').style.display = 'block';
   if (!chartLoadedOnce){
     el('loadnote').textContent = 'Loading all rows…';
     setTimeout(() => {
@@ -410,6 +418,17 @@ el('save').addEventListener('click', () => {
   el('savedBtn').textContent = `Saved (${saved})`;
   el('save').textContent = 'Saved ✓';
   setTimeout(() => { el('save').textContent = 'Save query'; }, 1400);
+});
+el('tonotes').addEventListener('click', () => {
+  if (!current) return;
+  el('tonotes').textContent = 'Sending…';
+  const toast = el('dtoast');
+  setTimeout(() => {
+    el('tonotes').textContent = 'Send to Notes ↗';
+    toast.textContent = 'Sent to Notes. This dataset is being written up as a note.';
+    toast.classList.add('on');
+    setTimeout(() => toast.classList.remove('on'), 3200);
+  }, 550);
 });
 
 function drawControls(){
