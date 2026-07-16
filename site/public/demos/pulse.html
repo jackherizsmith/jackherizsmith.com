@@ -5,24 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pulse · simulated demo</title>
 <meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F4F6F4;--surface:#fff;--ink:#16181A;--muted:#5B6470;--line:#E2E6E2;
     --signal:#0E9E6E;--signal-deep:#0A6B4B;--warn:#C8861A;--danger:#C24255;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:14px}
-  .disp{font-family:"Space Grotesk",sans-serif}
-  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:14px}
+  .disp{font-family:"Avenir Next",sans-serif}
+  .mono{font-family:ui-monospace,ui-monospace,monospace}
   .bar{
     position:sticky;top:0;z-index:20;background:rgba(244,246,244,.92);backdrop-filter:blur(6px);
     border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:12px 20px;flex-wrap:wrap;
   }
   .logo{display:flex;align-items:center;gap:8px}
   .logo svg{width:34px;height:18px}
-  .logo b{font-family:"Space Grotesk",sans-serif;font-size:16px}
+  .logo b{font-family:"Avenir Next",sans-serif;font-size:16px}
   .logo span{color:var(--muted);font-size:12px}
   .bar input{
     font:inherit;font-size:13px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;outline:none;width:180px;
@@ -43,24 +41,24 @@
   #progress{position:absolute;left:0;bottom:-1px;height:2px;background:var(--signal);width:0;transition:width .4s}
 
   main{max-width:1060px;margin:0 auto;padding:26px 20px 90px}
-  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  h1.verdict{font-family:"Space Grotesk",sans-serif;font-size:26px;line-height:1.25;margin:8px 0 6px;max-width:860px}
+  .eyebrow{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  h1.verdict{font-family:"Avenir Next",sans-serif;font-size:26px;line-height:1.25;margin:8px 0 6px;max-width:860px}
   .narrative{color:var(--muted);font-size:13.5px;max-width:760px}
 
   .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:22px 0}
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
   .kpi .lbl{font-size:11px;color:var(--muted);margin-bottom:4px}
-  .kpi .val{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:600}
+  .kpi .val{font-family:ui-monospace,monospace;font-size:21px;font-weight:600}
   .kpi .sub{font-size:11px;color:var(--muted);margin-top:3px}
   .up{color:var(--signal-deep)} .down{color:var(--danger)}
 
   .acth{display:flex;align-items:baseline;gap:12px;margin:26px 0 10px}
-  .acth h2{font-family:"Space Grotesk",sans-serif;font-size:17px}
+  .acth h2{font-family:"Avenir Next",sans-serif;font-size:17px}
   .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .action{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px;display:flex;flex-direction:column;gap:8px}
   .action .t{font-weight:650;font-size:13px;line-height:1.4}
   .action .meta{display:flex;gap:6px;flex-wrap:wrap}
-  .mchip{font-family:"IBM Plex Mono",monospace;font-size:10.5px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--muted)}
+  .mchip{font-family:ui-monospace,monospace;font-size:10.5px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--muted)}
   .action .why{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
   .abtns{display:flex;gap:6px}
   .abtns button{font:inherit;font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px 10px;cursor:pointer;color:var(--muted)}
@@ -70,16 +68,16 @@
   details.acc{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-top:12px;overflow:hidden}
   details.acc summary{
     padding:14px 18px;cursor:pointer;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;
-    font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:14.5px;
+    font-family:"Avenir Next",sans-serif;font-weight:700;font-size:14.5px;
   }
-  details.acc summary .sum{font-family:Inter,sans-serif;font-weight:400;font-size:12px;color:var(--muted)}
+  details.acc summary .sum{font-family:sans-serif;font-weight:400;font-size:12px;color:var(--muted)}
   .accbody{padding:4px 18px 18px}
   .duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  h3.mini{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 8px}
+  h3.mini{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 8px}
   h3.mini.warn{color:var(--warn)} h3.mini.good{color:var(--signal-deep)}
 
   table{border-collapse:collapse;width:100%;font-size:12.5px}
-  th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+  th{font-family:ui-monospace,monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
   td{padding:7px 9px;border-bottom:1px solid #eef1ee;font-variant-numeric:tabular-nums}
   tr.you td{background:rgba(14,158,110,.06);font-weight:600;color:var(--signal-deep)}
   td.r,th.r{text-align:right}
@@ -94,7 +92,7 @@
 
   .log{font-size:12.5px}
   .log .row{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #eef1ee;flex-wrap:wrap}
-  .st{font-family:"IBM Plex Mono",monospace;font-size:10px;border-radius:6px;padding:2px 7px;font-weight:600}
+  .st{font-family:ui-monospace,monospace;font-size:10px;border-radius:6px;padding:2px 7px;font-weight:600}
   .st.done{background:#dcefe6;color:var(--signal-deep)}
   .st.dism{background:#f1e6d3;color:var(--warn)}
   .log .when{margin-left:auto;color:var(--muted);font-size:11px}
@@ -112,7 +110,7 @@
   .prompt-row .lock{margin-left:auto;font-size:11px;color:var(--muted);cursor:pointer;white-space:nowrap}
   .foot{margin-top:20px;color:#8b93a0;font-size:12px}
   svg.chart{width:100%;display:block}
-  .legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-family:ui-monospace,monospace;font-size:11px;color:var(--muted)}
   .legend i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
   @media (max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.cards3,.duo{grid-template-columns:1fr}}
 </style>
@@ -231,15 +229,15 @@ function trendSvg(m){
   for (let t = 0; t <= 3; t++){
     const v = max / 3 * t;
     s += `<line x1="${padL}" y1="${yAt(v)}" x2="${W}" y2="${yAt(v)}" stroke="#EEF1EE"/>
-      <text x="${padL - 6}" y="${yAt(v) + 4}" text-anchor="end" font-size="9" fill="#8b93a0" font-family="IBM Plex Mono">${Math.round(v)}%</text>`;
+      <text x="${padL - 6}" y="${yAt(v) + 4}" text-anchor="end" font-size="9" fill="#8b93a0" font-family=ui-monospace>${Math.round(v)}%</text>`;
   }
   for (let w = 0; w < weeks; w++){
-    s += `<text x="${xAt(w)}" y="${H - 22}" text-anchor="middle" font-size="9" fill="#8b93a0" font-family="IBM Plex Mono">wk ${w + 1}</text>`;
+    s += `<text x="${xAt(w)}" y="${H - 22}" text-anchor="middle" font-size="9" fill="#8b93a0" font-family=ui-monospace>wk ${w + 1}</text>`;
   }
   COMPLETED.forEach(a => {
     const x = xAt(a.week);
     s += `<line x1="${x}" y1="${padT - 8}" x2="${x}" y2="${H - padB}" stroke="#C8861A" stroke-width="1.5" stroke-dasharray="4 4"/>
-      <text x="${x + 4}" y="${padT}" font-size="9" fill="#C8861A" font-family="IBM Plex Mono">▲ ${a.t}</text>`;
+      <text x="${x + 4}" y="${padT}" font-size="9" fill="#C8861A" font-family=ui-monospace>▲ ${a.t}</text>`;
   });
   m.sov.forEach((series, bi) => {
     const pts = series.map((v, w) => `${xAt(w).toFixed(1)},${yAt(v).toFixed(1)}`).join(' ');

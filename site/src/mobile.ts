@@ -255,7 +255,12 @@ function showDemo(i: number): void {
   const d = DEMOS[viewerIdx];
   const v = qs('.m-viewer');
   if (!v) return;
-  (v.querySelector('.m-frame') as HTMLIFrameElement).src = d.href;
+  const frame = v.querySelector('.m-frame') as HTMLIFrameElement;
+  const loader = v.querySelector('.geo-loader');
+  loader?.classList.add('on');
+  frame.onload = () => loader?.classList.remove('on');
+  window.setTimeout(() => loader?.classList.remove('on'), 8000);
+  frame.src = d.href;
   const vt = v.querySelector('.m-vt');
   if (vt) vt.textContent = d.name;
   const open = v.querySelector('.m-open') as HTMLAnchorElement | null;
@@ -275,7 +280,13 @@ function buildViewer(): void {
       <span class="m-vt"></span>
       <a class="m-open" target="_blank" rel="noopener">Open ↗</a>
     </div>
-    <iframe class="m-frame" title="Demo"></iframe>
+    <div class="m-stage">
+      <iframe class="m-frame" title="Demo"></iframe>
+      <div class="geo-loader" aria-hidden="true">
+        <svg class="geo" viewBox="0 0 66 66"><polygon class="a" points="33,7 58,52 8,52"/><rect class="b" x="17" y="17" width="32" height="32" rx="3"/><circle class="c" cx="33" cy="33" r="9"/></svg>
+        <span class="geo-label">Loading demo…</span>
+      </div>
+    </div>
     <div class="m-viewer-nav">
       <button class="m-prev" type="button" aria-label="Previous demo">‹</button>
       <span class="m-dots">${DEMOS.map(() => '<i></i>').join('')}</span>

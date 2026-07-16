@@ -17,6 +17,7 @@ function initPresent(): void {
   const frame = qs('#presentFrame') as HTMLIFrameElement;
   const title = qs('#presentTitle');
   const openTab = qs('#presentOpen') as HTMLAnchorElement;
+  const loader = document.getElementById('presentLoader');
 
   const close = (): void => {
     overlay.classList.remove('on');
@@ -24,6 +25,9 @@ function initPresent(): void {
   };
 
   const open = (demo: string, href: string): void => {
+    loader?.classList.add('on');
+    frame.onload = () => loader?.classList.remove('on');
+    window.setTimeout(() => loader?.classList.remove('on'), 8000);
     frame.src = href;
     title.textContent = `▶ Presenting · ${DEMO_NAMES[demo] ?? demo}`;
     openTab.href = href;
