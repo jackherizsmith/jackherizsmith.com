@@ -243,38 +243,26 @@ function enableTilt(): void {
   }
 }
 
-/* ── Swipeable demos ─────────────────────── */
+/* ── Demo viewer ─────────────────────────── */
+// One fully-interactive demo at a time (its buttons work, it scrolls), with
+// arrow navigation between demos. A swipeable pager would need the iframe
+// pointer-events disabled, which breaks the demo itself, so arrows it is.
 
 let viewerIdx = 0;
 
-function loadSlide(i: number): void {
-  if (i < 0 || i >= DEMOS.length) return;
-  const slide = document.querySelectorAll<HTMLElement>('.m-slide')[i];
-  const f = slide?.querySelector('iframe') as HTMLIFrameElement | null;
-  if (f && !f.getAttribute('src')) f.src = DEMOS[i].href;
-}
-
-function setActive(i: number): void {
+function showDemo(i: number): void {
   viewerIdx = Math.max(0, Math.min(DEMOS.length - 1, i));
-  [viewerIdx - 1, viewerIdx, viewerIdx + 1].forEach(loadSlide);
+  const d = DEMOS[viewerIdx];
   const v = qs('.m-viewer');
   if (!v) return;
+  (v.querySelector('.m-frame') as HTMLIFrameElement).src = d.href;
   const vt = v.querySelector('.m-vt');
-  if (vt) vt.textContent = DEMOS[viewerIdx].name;
+  if (vt) vt.textContent = d.name;
   const open = v.querySelector('.m-open') as HTMLAnchorElement | null;
-  if (open) open.href = DEMOS[viewerIdx].href;
-  const prev = v.querySelector('.m-prev') as HTMLButtonElement | null;
-  const next = v.querySelector('.m-next') as HTMLButtonElement | null;
-  if (prev) prev.disabled = viewerIdx === 0;
-  if (next) next.disabled = viewerIdx === DEMOS.length - 1;
-  v.querySelectorAll('.m-dots i').forEach((d, n) => d.classList.toggle('on', n === viewerIdx));
-}
-
-function scrollToDemo(i: number): void {
-  const track = qs('.m-track');
-  if (!track) return;
-  const clamped = Math.max(0, Math.min(DEMOS.length - 1, i));
-  track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' });
+  if (open) open.href = d.href;
+  (v.querySelector('.m-prev') as HTMLButtonElement).disabled = viewerIdx === 0;
+  (v.querySelector('.m-next') as HTMLButtonElement).disabled = viewerIdx === DEMOS.length - 1;
+  v.querySelectorAll('.m-dots i').forEach((dot, n) => dot.classList.toggle('on', n === viewerIdx));
 }
 
 function buildViewer(): void {
@@ -287,51 +275,24 @@ function buildViewer(): void {
       <span class="m-vt"></span>
       <a class="m-open" target="_blank" rel="noopener">Open ↗</a>
     </div>
-    <div class="m-track">
-      ${DEMOS.map(d => `
-        <div class="m-slide">
-          <iframe title="${d.name}" loading="lazy"></iframe>
-          <button class="m-try" type="button">Tap to try ${d.name}</button>
-        </div>`).join('')}
-    </div>
+    <iframe class="m-frame" title="Demo"></iframe>
     <div class="m-viewer-nav">
       <button class="m-prev" type="button" aria-label="Previous demo">‹</button>
       <span class="m-dots">${DEMOS.map(() => '<i></i>').join('')}</span>
       <button class="m-next" type="button" aria-label="Next demo">›</button>
     </div>`;
   document.body.append(v);
-
-  const track = v.querySelector('.m-track') as HTMLElement;
   v.querySelector('.m-close')!.addEventListener('click', closeViewer);
-  v.querySelector('.m-prev')!.addEventListener('click', () => scrollToDemo(viewerIdx - 1));
-  v.querySelector('.m-next')!.addEventListener('click', () => scrollToDemo(viewerIdx + 1));
-  v.querySelectorAll<HTMLElement>('.m-slide').forEach(slide => {
-    slide.querySelector('.m-try')!.addEventListener('click', () => {
-      const f = slide.querySelector('iframe') as HTMLIFrameElement;
-      f.style.pointerEvents = 'auto';
-      (slide.querySelector('.m-try') as HTMLElement).style.display = 'none';
-    });
-  });
-
-  let raf = 0;
-  track.addEventListener('scroll', () => {
-    if (raf) return;
-    raf = requestAnimationFrame(() => {
-      raf = 0;
-      const i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
-      if (i !== viewerIdx) setActive(i);
-    });
-  }, { passive: true });
+  v.querySelector('.m-prev')!.addEventListener('click', () => showDemo(viewerIdx - 1));
+  v.querySelector('.m-next')!.addEventListener('click', () => showDemo(viewerIdx + 1));
 }
 
 function openViewer(idx: number): void {
   const v = qs('.m-viewer');
-  const track = qs('.m-track');
-  if (!v || !track) return;
+  if (!v) return;
   v.hidden = false;
   document.body.style.overflow = 'hidden';
-  setActive(idx);
-  track.scrollLeft = viewerIdx * track.clientWidth;
+  showDemo(idx);
 }
 
 function closeViewer(): void {
@@ -339,6 +300,7 @@ function closeViewer(): void {
   if (!v) return;
   v.hidden = true;
   document.body.style.overflow = '';
+  (v.querySelector('.m-frame') as HTMLIFrameElement).src = 'about:blank';
 }
 
 function setupCarousel(): void {
