@@ -103,7 +103,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 
 .artboard-label{
-  position:absolute;left:394px;top:64px;font-size:11px;color:#7d838a;
+  position:absolute;left:394px;top:64px;font-size:11px;color:#6b7076;
   display:flex;gap:6px;align-items:center;
 }
 .artboard-label .dot{width:6px;height:6px;border-radius:50%;background:var(--jack)}
@@ -117,7 +117,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 
 /* document */
 [data-text]{white-space:pre-line}
-.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a9099;margin-bottom:16px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b7076;margin-bottom:16px}
 .artboard h1{
   font-family:ui-serif,"New York",Georgia,serif;font-weight:600;
   font-size:54px;line-height:1.06;letter-spacing:-.015em;color:#17191c;margin-bottom:20px;
@@ -133,7 +133,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
   font-family:ui-serif,"New York",Georgia,serif;font-weight:600;font-size:22px;
   color:#17191c;margin-bottom:12px;
 }
-.work-sub{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8a9099;margin:26px 0 8px}
+.work-sub{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6b7076;margin:26px 0 8px}
 .work{display:grid;gap:2px}
 .work .item{
   display:grid;grid-template-columns:150px 1fr;gap:16px;padding:13px 12px;border-radius:10px;
@@ -151,18 +151,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
    Badge is shared; the grid is desktop, the carousel is mobile. */
 .demo-badge{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;flex:none;box-shadow:0 2px 6px rgba(20,30,40,.14)}
 @media (min-width:901px){
-  .work.demos{grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
-  .work.demos .item{display:flex;flex-direction:column;gap:9px;align-items:stretch;
+  /* Carousel that bleeds off the page's right edge, mirroring the mobile view */
+  .work.demos{display:flex;flex-wrap:nowrap;gap:12px;margin:4px -72px 0 0;overflow-x:auto;
+    padding-bottom:10px;scroll-snap-type:x proximity;scrollbar-width:none}
+  .work.demos::-webkit-scrollbar{display:none}
+  .work.demos .item{flex:none;width:240px;scroll-snap-align:start;display:flex;flex-direction:column;gap:9px;align-items:stretch;
     border:1px solid #eceef1;border-radius:14px;padding:18px}
   .work.demos .item:hover{background:#f8fafc;border-color:#dfe4ea}
   .work.demos .name{font-size:15.5px;font-weight:650}
   .work.demos .desc{flex:1;font-size:13.5px}
   .work.demos .play{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
     color:#fff;background:#17191c;border-radius:99px;padding:7px 14px;text-decoration:none}
-  .work.demos .play:hover{background:var(--select)}
-  .work.demos .item:last-child{grid-column:1/-1}
+  .work.demos .play:hover{background:#33373d}
 }
-.disclosure{max-width:520px;font-size:13px;line-height:1.6;font-style:italic;color:#8a9099;margin:20px 0 48px}
+.disclosure{max-width:520px;font-size:13px;line-height:1.6;font-style:italic;color:#6b7076;margin:20px 0 48px}
 .contact{display:flex;align-items:center;gap:16px;border-top:1px solid #eceef1;padding-top:24px;margin-top:44px;font-size:14px;color:#3c4147}
 .contact .links{margin-left:auto;display:flex;gap:14px;font-size:13px}
 .contact .links a{color:#5a6067;text-decoration-color:#c3c9d0;text-underline-offset:3px}
@@ -472,7 +474,8 @@ body.interacting iframe{pointer-events:none}
   .artboard h1{font-weight:var(--m-display-wt,600);color:var(--m-ink,#17191c);font-size:40px}
   .artboard h2,.artboard h3:not(.work-sub),.work .name{color:var(--m-ink,#17191c)}
   .intro,.work .desc,.contact,.disclosure{color:var(--m-body,#5a6067)}
-  .kicker,.work-sub{color:var(--m-accent,#8a9099)}
+  .kicker{color:var(--m-body,#5a6067)}
+  .work-sub{color:var(--m-ink,#17191c)}
   .btn{background:var(--m-accent,#17191c);color:var(--m-onaccent,#fff);border-color:transparent}
   .contact{flex-direction:column;align-items:flex-start;border-top-color:var(--m-line,#eceef1)}
   .contact .links{margin-left:0}
@@ -497,7 +500,7 @@ body.interacting iframe{pointer-events:none}
   .m-carousel .item{min-width:82%;scroll-snap-align:center;display:flex;flex-direction:column;gap:9px;cursor:pointer;touch-action:manipulation}
   .m-carousel .item .name{font-size:15px;font-weight:650}
   .m-carousel .item .desc{flex:1}
-  .m-carousel .item .play{align-self:flex-start;background:var(--m-accent,#0d99ff);color:var(--m-onaccent,#fff);padding:7px 14px;border-radius:99px;font-size:12px;font-weight:700}
+  .m-carousel .item .play{align-self:flex-start;background:var(--m-ink,#17191c);color:var(--m-surface,#fff);padding:7px 14px;border-radius:99px;font-size:12px;font-weight:700}
   .m-swipehint{font-size:11px;color:var(--m-body,#8a9099);opacity:.8;margin:0 0 8px;display:flex;gap:6px;align-items:center}
 
   /* Restyle bar */
@@ -543,5 +546,9 @@ body.interacting iframe{pointer-events:none}
   /* Each block gets its own perspective and tilts about its own centre, so the
      effect stays stable while the page scrolls. --z (assigned in document order
      by mobile.ts, top = nearest) ramps in via --tz to lift the layers apart. */
-  .artboard.tilt3d > *{will-change:transform;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
+  .artboard.tilt3d > *{will-change:transform;transform-style:preserve-3d;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
+  /* Extra depth layers: each card lifts above its section, its contents lift
+     above the card face, and the card gains tilt-driven extruded "sides". */
+  .artboard.tilt3d .item{transform-style:preserve-3d;transform:translateZ(calc(var(--tz,0) * 20px));box-shadow:var(--cuboid,none)}
+  .artboard.tilt3d .item > *{transform:translateZ(calc(var(--tz,0) * 10px))}
 }

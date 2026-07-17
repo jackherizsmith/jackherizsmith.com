@@ -100,7 +100,7 @@ function apply(el: HTMLElement, s: NodeState): void {
     el.style.background = '';
     el.style.color = '';
   }
-  el.style.display = s.hidden ? 'none' : '';
+  el.style.visibility = s.hidden ? 'hidden' : '';
 }
 
 function notify(id: string): void {

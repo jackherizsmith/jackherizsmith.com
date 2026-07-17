@@ -19,16 +19,16 @@
   <div class="file-chip">jackherizsmith.com <span class="badge" id="docBadge">v2 · live</span></div>
   <div class="grow"></div>
   <div class="tools" role="toolbar" aria-label="Tools">
-    <button class="tool on" id="toolMove" title="Move (V)"><svg viewBox="0 0 16 16"><path d="M4 2l9 7-4 1 2.5 4-2 1L7 11l-3 3z"/></svg></button>
-    <button class="tool" id="toolSticky" title="New sticky (S)"><svg viewBox="0 0 16 16"><path d="M2 2h12v8l-4 4H2zM10 14v-4h4"/></svg></button>
-    <button class="tool" id="toolComment" title="Leave a comment"><svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 01-6 6H2l1.5-2.5A6 6 0 1114 8z"/></svg></button>
-    <button class="tool" id="toolUndo" title="Undo (⌘Z)" disabled><svg viewBox="0 0 16 16"><path d="M6 4L2 8l4 4M2 8h8a4 4 0 010 8"/></svg></button>
-    <button class="tool" id="toolRedo" title="Redo (⇧⌘Z)" disabled><svg viewBox="0 0 16 16"><path d="M10 4l4 4-4 4M14 8H6a4 4 0 000 8"/></svg></button>
-    <button class="tool" id="toolHistory" title="Version history"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></button>
-    <button class="tool" id="toolTests" title="Run tests"><svg viewBox="0 0 16 16"><path d="M3 2h10M6 2v4L3 13a1 1 0 001 1h8a1 1 0 001-1l-3-7V2"/><path d="M5.5 10h5"/></svg></button>
+    <button class="tool on" id="toolMove" title="Move (V)" aria-label="Move tool"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2l9 7-4 1 2.5 4-2 1L7 11l-3 3z"/></svg></button>
+    <button class="tool" id="toolSticky" title="New sticky (S)" aria-label="New sticky note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h12v8l-4 4H2zM10 14v-4h4"/></svg></button>
+    <button class="tool" id="toolComment" title="Leave a comment" aria-label="Leave a comment"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M14 8a6 6 0 01-6 6H2l1.5-2.5A6 6 0 1114 8z"/></svg></button>
+    <button class="tool" id="toolUndo" title="Undo (⌘Z)" aria-label="Undo" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L2 8l4 4M2 8h8a4 4 0 010 8"/></svg></button>
+    <button class="tool" id="toolRedo" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 4l4 4-4 4M14 8H6a4 4 0 000 8"/></svg></button>
+    <button class="tool" id="toolHistory" title="Version history" aria-label="Version history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></button>
+    <button class="tool" id="toolTests" title="Run tests" aria-label="Run tests"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h10M6 2v4L3 13a1 1 0 001 1h8a1 1 0 001-1l-3-7V2"/><path d="M5.5 10h5"/></svg></button>
   </div>
   <div class="grow"></div>
-  <div class="presence"><button class="jack" id="followJack" type="button" title="Follow Jack's cursor">J</button><i class="you" title="You" aria-hidden="true">You</i></div>
+  <div class="presence"><button class="jack" id="followJack" type="button" title="Follow Jack's cursor" aria-label="Follow Jack's cursor">J</button><i class="you" title="You" aria-hidden="true">You</i></div>
   <button class="chrome-btn" id="resetBtn" hidden>Reset</button>
   <span class="zoom">100%</span>
   <button class="publish" id="publishBtn">Publish</button>
@@ -103,25 +103,25 @@
             <span class="demo-badge" style="background:#3182ce" aria-hidden="true">D</span>
             <span class="name">Data</span>
             <span class="desc" data-node="Text · Data blurb" data-id="work-data-desc" data-text>Ask-the-database analytics: plain-English questions compiled into careful SQL.</span>
-            <a class="tag play" data-demo="data" href="/demos/data">▶ Demo</a>
+            <a class="tag play" data-demo="data" href="/demos/data">Demo</a>
           </div>
           <div class="item" data-node="Card · Notes" data-id="work-notes">
             <span class="demo-badge" style="background:#0d9488" aria-hidden="true">N</span>
             <span class="name">Notes</span>
             <span class="desc" data-node="Text · Notes blurb" data-id="work-notes-desc" data-text>Turns transcripts, CSVs and recordings into designed webpages: a different layout, colour scheme and scorecard per note type, generated on the edge.</span>
-            <a class="tag play" data-demo="notes" href="/demos/notes">▶ Demo</a>
+            <a class="tag play" data-demo="notes" href="/demos/notes">Demo</a>
           </div>
           <div class="item" data-node="Card · Pulse" data-id="work-pulse">
             <span class="demo-badge" style="background:#0e9e6e" aria-hidden="true">P</span>
             <span class="name">Pulse</span>
             <span class="desc" data-node="Text · Pulse blurb" data-id="work-pulse-desc" data-text>Tracks how AI assistants talk about a brand: weekly sweeps across answer engines, scored against competitors, with cited quick wins.</span>
-            <a class="tag play" data-demo="pulse" href="/demos/pulse">▶ Demo</a>
+            <a class="tag play" data-demo="pulse" href="/demos/pulse">Demo</a>
           </div>
           <div class="item" data-node="Card · Read Only Everything" data-id="work-roe">
             <span class="demo-badge" style="background:#0e9db5" aria-hidden="true">R</span>
             <span class="name">Read Only Everything</span>
             <span class="desc" data-node="Text · ROE blurb" data-id="work-roe-desc" data-text>One search across Slack, Gmail, Calendar, Notion and the database. Read-only scopes by design, so it can be trusted everywhere.</span>
-            <a class="tag play" data-demo="roe" href="/demos/roe">▶ Demo</a>
+            <a class="tag play" data-demo="roe" href="/demos/roe">Demo</a>
           </div>
           <div class="item" data-node="Card · Slack bots" data-id="work-bots">
             <span class="demo-badge" style="background:#611f69" aria-hidden="true">S</span>

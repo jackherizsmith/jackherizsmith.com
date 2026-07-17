@@ -135,9 +135,9 @@ function buildHeroFx(): void {
   fx.className = 'm-fx';
   fx.setAttribute('aria-hidden', 'true');
   const specs = [
-    { s: 200, l: '-40px', t: '-30px', o: 0.7 },
-    { s: 150, l: '58%', t: '20px', o: 0.6 },
-    { s: 120, l: '30%', t: '150px', o: 0.5 },
+    { s: 200, l: '-40px', t: '-30px', o: 0.32 },
+    { s: 150, l: '58%', t: '20px', o: 0.26 },
+    { s: 120, l: '30%', t: '150px', o: 0.22 },
   ];
   specs.forEach(sp => {
     const b = document.createElement('div');
@@ -159,9 +159,9 @@ function setupDepthLayers(): void {
   if (!stage) return;
   const kids = ([...stage.children] as HTMLElement[])
     .filter(el => el.id !== 'emptyState' && !el.classList.contains('m-fx'));
-  const base = 78, step = 9;
+  const base = 92, step = 11;
   kids.forEach((el, i) => el.style.setProperty('--z', String(base - i * step)));
-  stage.querySelector<HTMLElement>('.m-fx')?.style.setProperty('--z', '-120');
+  stage.querySelector<HTMLElement>('.m-fx')?.style.setProperty('--z', '-140');
 }
 
 function tiltFrame(): void {
@@ -177,6 +177,17 @@ function tiltFrame(): void {
     stage.style.setProperty('--tz', mag.toFixed(3));
     stage.style.setProperty('--rx', `${(curY * -16).toFixed(2)}deg`);
     stage.style.setProperty('--ry', `${(curX * 16).toFixed(2)}deg`);
+    // Extruded "side" for the cards: a layered hard shadow offset opposite the
+    // tilt, growing with the angle, so containers read as cuboids standing up.
+    const dep = mag * 16;
+    const ox = -curX * dep, oy = curY * dep;
+    let sh = '';
+    for (let i = 1; i <= 5; i++) {
+      const f = i / 5;
+      sh += `${(ox * f).toFixed(1)}px ${(oy * f).toFixed(1)}px 0 rgba(20,30,40,.06),`;
+    }
+    sh += `${(ox * 1.3).toFixed(1)}px ${(oy * 1.3 + 5).toFixed(1)}px 20px rgba(20,30,40,${(0.14 * mag).toFixed(2)})`;
+    stage.style.setProperty('--cuboid', sh);
   }
   if (Math.abs(targetX - curX) > 0.02 || Math.abs(targetY - curY) > 0.02) schedule();
 }
