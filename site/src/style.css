@@ -112,7 +112,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .artboard{
   position:absolute;left:392px;top:84px;width:720px;background:#fff;border-radius:2px;
   box-shadow:0 1px 3px rgba(20,30,40,.10),0 8px 28px rgba(20,30,40,.08);
-  padding:64px 72px 56px;z-index:1;
+  padding:64px 72px 56px;
 }
 
 /* document */
