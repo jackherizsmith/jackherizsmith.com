@@ -112,7 +112,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .artboard{
   position:absolute;left:392px;top:84px;width:720px;background:#fff;border-radius:2px;
   box-shadow:0 1px 3px rgba(20,30,40,.10),0 8px 28px rgba(20,30,40,.08);
-  padding:64px 72px 56px;
+  padding:64px 72px 56px;z-index:1;
 }
 
 /* document */
@@ -151,11 +151,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
    Badge is shared; the grid is desktop, the carousel is mobile. */
 .demo-badge{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;flex:none;box-shadow:0 2px 6px rgba(20,30,40,.14)}
 @media (min-width:901px){
-  /* Carousel that bleeds off the page's right edge, mirroring the mobile view */
-  .work.demos{display:flex;flex-wrap:nowrap;gap:12px;margin:4px -72px 0 0;overflow-x:auto;
-    padding-bottom:10px;scroll-snap-type:x proximity;scrollbar-width:none}
-  .work.demos::-webkit-scrollbar{display:none}
-  .work.demos .item{flex:none;width:240px;scroll-snap-align:start;display:flex;flex-direction:column;gap:9px;align-items:stretch;
+  /* A Figma frame doesn't scroll: the cards simply overflow the frame edge
+     onto the canvas (opaque, and lifted above the prototype frames). */
+  .work.demos{display:flex;flex-wrap:nowrap;gap:12px;margin-top:4px;overflow:visible}
+  .work.demos .item{flex:none;width:240px;background:#fff;display:flex;flex-direction:column;gap:9px;align-items:stretch;
     border:1px solid #eceef1;border-radius:14px;padding:18px}
   .work.demos .item:hover{background:#f8fafc;border-color:#dfe4ea}
   .work.demos .name{font-size:15.5px;font-weight:650}
