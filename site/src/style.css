@@ -546,9 +546,11 @@ body.interacting iframe{pointer-events:none}
   /* Each block gets its own perspective and tilts about its own centre, so the
      effect stays stable while the page scrolls. --z (assigned in document order
      by mobile.ts, top = nearest) ramps in via --tz to lift the layers apart. */
-  .artboard.tilt3d > *{will-change:transform;transform-style:preserve-3d;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
-  /* Extra depth layers: each card lifts above its section, its contents lift
-     above the card face, and the card gains tilt-driven extruded "sides". */
-  .artboard.tilt3d .item{transform-style:preserve-3d;transform:translateZ(calc(var(--tz,0) * 20px));box-shadow:var(--cuboid,none)}
-  .artboard.tilt3d .item > *{transform:translateZ(calc(var(--tz,0) * 10px))}
+  /* Every content leaf (hero elements, headings, AND each card) is its own
+     tilting plane, so all sections behave like the top section. Sections
+     themselves stay flat containers. --z (document order) ramps in via --tz. */
+  .artboard.tilt3d .tilt-layer{will-change:transform;transform-style:preserve-3d;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(calc(var(--z,0) * var(--tz,0) * 1px))}
+  /* Cards gain contents that lift above the face and tilt-driven extruded sides */
+  .artboard.tilt3d .item{box-shadow:var(--cuboid,none)}
+  .artboard.tilt3d .item > *{transform:translateZ(calc(var(--tz,0) * 8px))}
 }

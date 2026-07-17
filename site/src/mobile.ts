@@ -157,11 +157,25 @@ function buildHeroFx(): void {
 // so tilting fans them into an exaggerated 3D staircase.
 function setupDepthLayers(): void {
   if (!stage) return;
-  const kids = ([...stage.children] as HTMLElement[])
-    .filter(el => el.id !== 'emptyState' && !el.classList.contains('m-fx'));
-  const base = 92, step = 11;
-  kids.forEach((el, i) => el.style.setProperty('--z', String(base - i * step)));
-  stage.querySelector<HTMLElement>('.m-fx')?.style.setProperty('--z', '-140');
+  // Every content leaf becomes its own tilting plane (like the hero elements),
+  // not the section container. So cards inside a section tilt individually
+  // instead of the whole section moving as one flat block.
+  const leaves: HTMLElement[] = [];
+  ([...stage.children] as HTMLElement[]).forEach(el => {
+    if (el.id === 'emptyState' || el.classList.contains('m-fx')) return;
+    if (el.classList.contains('work')) {
+      el.querySelectorAll<HTMLElement>('.item').forEach(it => leaves.push(it));
+    } else {
+      leaves.push(el);
+    }
+  });
+  const base = 82, step = 6;
+  leaves.forEach((el, i) => {
+    el.classList.add('tilt-layer');
+    el.style.setProperty('--z', String(base - i * step));
+  });
+  const fx = stage.querySelector<HTMLElement>('.m-fx');
+  if (fx) { fx.classList.add('tilt-layer'); fx.style.setProperty('--z', '-140'); }
 }
 
 function tiltFrame(): void {
