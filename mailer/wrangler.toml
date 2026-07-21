@@ -1,0 +1,10 @@
+name = "jhs-mailer"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+# Pages Functions can't hold a send_email binding, so comment notifications are
+# sent from this tiny Worker instead. The comment Function calls it over a
+# shared secret (MAILER_SECRET). Restricted to Jack's inbox at the platform level.
+send_email = [
+  { name = "EMAIL", destination_address = "jackherizsmith@gmail.com" }
+]
