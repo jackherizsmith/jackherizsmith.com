@@ -420,7 +420,7 @@ function onKey(e: KeyboardEvent): void {
     else hist.undo();
     return;
   }
-  if (mod && e.key === '/') {
+  if (mod && e.key === '\\') {
     e.preventDefault();
     document.body.classList.toggle('panels-hidden');
     syncOverlay();
