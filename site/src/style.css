@@ -294,7 +294,7 @@ body.interacting [data-node]:hover{outline:none}
 @media (max-width:900px){
   body{overflow:auto;display:block}
   .toolbar{position:sticky;top:0;gap:6px}
-  .tools,.presence,.zoom,#resetBtn,.publish,.panel,.hint,#overlay,.artboard-label,.sticky,.arrow-label,.wires,.artboard.v1,.proto,.bwin,.pin,.comment-pop,.present{display:none}
+  .tools,.presence,.zoom,#resetBtn,.publish,.panel,.hint,#overlay,.artboard-label,.sticky,.arrow-label,.wires,.artboard.v1,.proto,.bwin,.pin,.comment-pop,.present,.desk-only{display:none}
   .app{display:block}
   .canvas{overflow:visible;background:var(--canvas)}
   .canvas-inner{width:auto;height:auto;padding:16px 10px 40px}
