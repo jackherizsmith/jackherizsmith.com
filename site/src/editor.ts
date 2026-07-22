@@ -420,6 +420,12 @@ function onKey(e: KeyboardEvent): void {
     else hist.undo();
     return;
   }
+  if (mod && e.key === '/') {
+    e.preventDefault();
+    document.body.classList.toggle('panels-hidden');
+    syncOverlay();
+    return;
+  }
   if (!selected) return;
   const el = selected;
   const id = el.dataset.id ?? '';

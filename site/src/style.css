@@ -52,6 +52,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .panel{background:var(--chrome);overflow-y:auto;position:relative;z-index:20}
 .panel.left{border-right:1px solid var(--chrome-line)}
 .panel.right{border-left:1px solid var(--chrome-line)}
+body.panels-hidden .app{grid-template-columns:1fr}
+body.panels-hidden .panel{display:none}
 .panel h3{
   font-size:11px;font-weight:600;padding:12px 12px 8px;
   display:flex;justify-content:space-between;align-items:center;
