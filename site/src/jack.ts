@@ -92,9 +92,15 @@ let canvasEl: HTMLElement;
 let followBtn: HTMLElement;
 let following = false;
 
+function centreOnJack(): void {
+  canvasEl.scrollLeft = jx - canvasEl.clientWidth / 2;
+  canvasEl.scrollTop = jy - canvasEl.clientHeight / 2;
+}
+
 function setFollow(on: boolean): void {
   following = on;
   followBtn.classList.toggle('following', on);
+  if (on) centreOnJack();
   toast(on ? 'Following Jack. Scroll or press Esc to stop.' : 'Stopped following Jack.');
 }
 
@@ -322,10 +328,7 @@ function tick(now: number): void {
   jx += (dx / dist) * step;
   jy += (dy / dist) * step;
   cursor.style.transform = `translate(${jx}px, ${jy}px)`;
-  if (following) {
-    canvasEl.scrollLeft = jx - canvasEl.clientWidth / 2;
-    canvasEl.scrollTop = jy - canvasEl.clientHeight / 2;
-  }
+  if (following) centreOnJack();
 }
 
 export function initJack(): void {
