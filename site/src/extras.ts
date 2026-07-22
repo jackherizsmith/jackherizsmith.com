@@ -184,10 +184,6 @@ function openComposer(x: number, y: number): void {
   });
 }
 
-export function openContactComposer(): void {
-  openComposer(1118, 1080);
-}
-
 /* ── Version history ─────────────────────── */
 
 interface Version { v: string; when: string; title: string; org: string; note: string; current?: boolean }
@@ -239,5 +235,5 @@ export function initExtras(): void {
   initWindows();
   initPins();
   initHistory();
-  qs('#toolComment').addEventListener('click', () => openContactComposer());
+  qs('#toolComment').addEventListener('click', () => { window.location.href = 'mailto:hello@jackherizsmith.com'; });
 }
